@@ -24,6 +24,7 @@ import static com.qualcomm.robotcore.hardware.DcMotor.ZeroPowerBehavior;
 import java.util.Queue;
 import java.util.LinkedList;
 
+
 public abstract class AutoBase extends LinearOpMode {
     BNO055IMU imu = null;
 

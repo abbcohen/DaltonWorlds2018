@@ -1,81 +1,142 @@
-package org.firstinspires.ftc.teamcode;
-import com.qualcomm.hardware.bosch.BNO055IMU;
+package org.firstinspires.ftc.teamcode.ignoreThis;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
+import org.firstinspires.ftc.robotcore.external.matrices.OpenGLMatrix;
+import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
+import static com.qualcomm.robotcore.hardware.DcMotor.ZeroPowerBehavior;
+import com.qualcomm.hardware.bosch.BNO055IMU;
+import com.qualcomm.robotcore.hardware.AnalogInput;
+import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.util.Range;
 import org.firstinspires.ftc.robotcore.external.ClassFactory;
-import org.firstinspires.ftc.robotcore.external.matrices.OpenGLMatrix;
-import org.firstinspires.ftc.robotcore.external.matrices.VectorF;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import org.firstinspires.ftc.robotcore.external.navigation.RelicRecoveryVuMark;
 import org.firstinspires.ftc.robotcore.external.navigation.VuMarkInstanceId;
-import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackable;
-import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackableDefaultListener;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackables;
-import static com.qualcomm.robotcore.hardware.DcMotor.ZeroPowerBehavior;
 import java.util.Queue;
 import java.util.LinkedList;
 
-
-public abstract class AutoBase extends LinearOpMode {
-    BNO055IMU imu = null;
-
-    //The power with which to turn when knocking off the jewel:
-    static final double JEWEL_TURN_TIME = 125;
-
-    //Clock to time operations:
+abstract class AutoBase extends LinearOpMode {
+    /**
+     * Clock to time operations
+     */
     private ElapsedTime clock = new ElapsedTime();
 
-    // Right color sensor:
+    /**
+     * Right color sensor
+     */
     ColorSensor CBR;
 
-    //Left color sensor:
+    /**
+     * Left color sensor
+     */
     ColorSensor CBL;
 
-    // Front-right Servo:
+    /**
+     * Front-right Servo
+     */
     DcMotor FR = null;
 
-    //Front-left Servo:
+    /**
+     * Front-left Servo
+     */
     DcMotor FL = null;
 
-    // Back-right Servo:
+    /**
+     * Back-right Servo
+     */
     DcMotor BR = null;
 
-    // Back-left Servo:
+    /**
+     * Back-left Servo
+     */
     DcMotor BL = null;
 
-    //Jewel Servo:
+    /**
+     * Jewel Servo
+     */
     Servo JS = null;
 
-    //Left grabber servo:
+    /**
+     * Left grabber servo
+     */
     Servo SL = null;
 
-    //Right grabber servo:
+    /**
+     * Right grabber servo
+     */
     Servo SR = null;
 
     DcMotor lift = null;
-
-    //Servo positions
+    /**
+     * Right servo closed position
+     */
     static final double RIGHT_SERVO_OPEN = 1 - 0.36;
+    /**
+     * Left servo closed position
+     */
     static final double LEFT_SERVO_OPEN = 0.36;
+
+    /**
+     * Right servo open position
+     */
     static final double RIGHT_SERVO_CLOSED = 1 - 0.73;
+
+
+    /**
+     * Left servo open position
+     */
     static final double LEFT_SERVO_CLOSED = 0.60;
+
+    static final double RIGHT_SERVO_AJAR = 1 - 0.62;
+
+    static final double RELIC_FLIPUP = .90;
+
+    static final double RELIC_FLIPDOWN = 0.42;
+
+    static final double RELIC_PICKUP = .17;
+
+    static final double RELIC_DROP = .33;
+
+    static final double LIFT_FLIPUP = .78;
+
+    static final double LIFT_FLIPDOWN = .2;
+
+
+    /**
+     * Left servo open position
+     */
+    static final double LEFT_SERVO_AJAR = 0.53;
+
     static final double RIGHT_SERVO_FLAT = 1 - 0.32;
+
+    /**
+     * Left servo open position
+     */
     static final double LEFT_SERVO_FLAT = 0.32;
+    static final double SHORT_DRIVE_TIME = 100;
+    static final double SHORT_DRIVE_POWER = .5;
     static final double JEWEL_SERVO_DOWN = .75;
-    static final double JEWEL_SERVO_UP = .12;
+    static final double JEWEL_SERVO_UP = .15;
+    OpenGLMatrix lastLocation = null;
 
-    //Behaviour when the motors are stopped:
+    /**
+     * Behaviour when the motors are stopped
+     */
     static final ZeroPowerBehavior ZERO_POWER_BEHAVIOR = ZeroPowerBehavior.BRAKE;
-
+    public void strafe(boolean strafe) {
+        FR.setDirection(strafe ? DcMotor.Direction.FORWARD : DcMotor.Direction.REVERSE);
+        FL.setDirection(strafe ? DcMotor.Direction.FORWARD : DcMotor.Direction.FORWARD);
+        BR.setDirection(strafe ? DcMotor.Direction.REVERSE : DcMotor.Direction.REVERSE);
+        BL.setDirection(strafe ? DcMotor.Direction.REVERSE : DcMotor.Direction.FORWARD);
+    }
     public double getAngleDiff(double angle1, double angle2) {
         if(Math.abs(angle1 - angle2) < 180.0)
             return Math.abs(angle1-angle2);
@@ -90,27 +151,47 @@ public abstract class AutoBase extends LinearOpMode {
             return Math.abs(angle1-angle2);
         }
     }
+    BNO055IMU imu = null;
 
-    //Jewel servo down position:
+    /**
+     * {@link #vuforia} is the variable we will use to store our instance of the Vuforia
+     * localization engine.
+     */
+    /**
+     * Jewel servo down position
+     */
+    /**
+     * The power with which to turn when knocking off the jewel.
+     */
+    private static final int JEWEL_TURN_TIME = 300;
     double counter = 0;
 
     AnalogInput ultrasonicLeft;
     AnalogInput ultrasonicBack;
     AnalogInput ultrasonicRight;
 
-    //Right color sensor:
     ColorSensor CBOT;
+    CRServo leftBottom;
+    CRServo rightTop;
+    CRServo leftTop;
+    CRServo rightBottom;
+    Servo liftServo;
 
-    //Vuforia initialization
+
+    /**
+     * {@link #vuforia} is the variable we will use to store our instance of the Vuforia
+     * localization engine.
+     */
     VuforiaLocalizer vuforia;
     VuforiaLocalizer.Parameters vufParameters = null;
     VuforiaTrackables relicTrackables = null;
     VuforiaTrackable relicTemplate = null;
 
 
-    //Data smoothing memory:
+    /*
+    Data smoothing memory
+     */
     Queue<Double> smooth_left = new LinkedList<Double>();
-
 
     /*
      * Code to run ONCE when the driver hits INIT
@@ -159,64 +240,98 @@ public abstract class AutoBase extends LinearOpMode {
         // ...
     }
 
-    //grab the preloaded glyph
-    private void getGlyph() {
-        closeGrabber();
-        double startTime = clock.milliseconds();
-        while (clock.milliseconds() - startTime < 500) {
+    /**
+     * Get the preloaded glyph
+     */
+    void lift(double power, double time) {
+        clock.reset();
+        while (!isStopRequested() && opModeIsActive() && clock.milliseconds() < time) {
+            if (!isStopRequested() && opModeIsActive()) lift.setPower(power);
         }
-        startTime = clock.milliseconds();
-        while (clock.milliseconds() - startTime < 500) {
-            lift.setPower(.7);
+        if (!isStopRequested() && opModeIsActive()) lift.setPower(0);
+    }
+    void intake(double power) {
+        if (!isStopRequested() && opModeIsActive()) rightBottom.setPower(-power);
+        if (!isStopRequested() && opModeIsActive()) leftBottom.setPower(power);
+        if (!isStopRequested() && opModeIsActive()) rightTop.setPower(power);
+        if (!isStopRequested() && opModeIsActive()) leftTop.setPower(-power);
+    }
+    void intake(double power, double time) {
+        clock.reset();
+        while(!isStopRequested() && opModeIsActive() && clock.milliseconds() < time) {
+            if (!isStopRequested() && opModeIsActive()) rightBottom.setPower(-power);
+            if (!isStopRequested() && opModeIsActive()) leftBottom.setPower(power);
+            if (!isStopRequested() && opModeIsActive()) rightTop.setPower(power);
+            if (!isStopRequested() && opModeIsActive()) leftTop.setPower(-power);
         }
-        lift.setPower(0);
+        if (!isStopRequested() && opModeIsActive()) rightBottom.setPower(0);
+        if (!isStopRequested() && opModeIsActive()) leftBottom.setPower(0);
+        if (!isStopRequested() && opModeIsActive()) rightTop.setPower(0);
+        if (!isStopRequested() && opModeIsActive()) leftTop.setPower(0);
+    }
+    void stopIntake() {
+        if (!isStopRequested() && opModeIsActive()) rightBottom.setPower(0);
+        if (!isStopRequested() && opModeIsActive()) leftBottom.setPower(0);
+        if (!isStopRequested() && opModeIsActive()) rightTop.setPower(0);
+        if (!isStopRequested() && opModeIsActive()) leftTop.setPower(0);
+    }
+    void outtake(double power) {
+        if (!isStopRequested() && opModeIsActive()) rightBottom.setPower(power);
+        if (!isStopRequested() && opModeIsActive()) leftBottom.setPower(-power);
+        if (!isStopRequested() && opModeIsActive()) rightTop.setPower(-power);
+        if (!isStopRequested() && opModeIsActive()) leftTop.setPower(power);
+    }
+    void outtake(double power, double time) {
+        clock.reset();
+        while(!isStopRequested() && opModeIsActive() && clock.milliseconds() < time) {
+            if (!isStopRequested() && opModeIsActive()) rightBottom.setPower(power);
+            if (!isStopRequested() && opModeIsActive()) leftBottom.setPower(-power);
+            if (!isStopRequested() && opModeIsActive()) rightTop.setPower(-power);
+            if (!isStopRequested() && opModeIsActive()) leftTop.setPower(power);
+        }
+        if (!isStopRequested() && opModeIsActive()) rightBottom.setPower(0);
+        if (!isStopRequested() && opModeIsActive()) leftBottom.setPower(0);
+        if (!isStopRequested() && opModeIsActive()) rightTop.setPower(0);
+        if (!isStopRequested() && opModeIsActive()) leftTop.setPower(0);
     }
 
-    //knock off the correct jewel
+    /**
+     * Push the correct jewel
+     */
     void pushJewel() {
         double power = 0.6;
-        initGyro();
-        JS.setPosition(JEWEL_SERVO_DOWN);
-        telemetry.addData("jewel position", JS.getPosition());
-        telemetry.update();
-        double startTime = clock.milliseconds();
-
-        while (clock.milliseconds() - startTime < 2000) {
-            telemetry.addData("CBL R,G,B", "(" + CBL.red() + ", " + CBL.green() + ", " + CBL.blue() + ")");
-            telemetry.update();
-        }
-
-        telemetry.addData("result", get_colors());
-
-        if (isRed()) {
-            if (get_colors() == JewelPosition.RED_JEWEL_LEFT) {
-                drive(.15, 0, 0, JEWEL_TURN_TIME);
-                JS.setPosition(JEWEL_SERVO_UP);
-                delay(1500);
-                drive(-.15, 0, 0, JEWEL_TURN_TIME);
-            } else if (get_colors() == JewelPosition.RED_JEWEL_RIGHT) {
-                drive(-.15, 0, 0, JEWEL_TURN_TIME);
-                JS.setPosition(JEWEL_SERVO_UP);
-                delay(1500);
-                drive(.15, 0, 0, JEWEL_TURN_TIME);
+        if (!isStopRequested() && opModeIsActive()) initGyro();
+        if (!isStopRequested() && opModeIsActive()) JS.setPosition(JEWEL_SERVO_DOWN);
+        if (!isStopRequested() && opModeIsActive()) delay(1500);
+        if (isRed() && !isStopRequested() && opModeIsActive()) {
+            if (get_colors() == JewelPosition.RED_JEWEL_LEFT && !isStopRequested() && opModeIsActive()) {
+                if (!isStopRequested() && opModeIsActive())  drive(.15, 0, 0, JEWEL_TURN_TIME);
+                if (!isStopRequested() && opModeIsActive()) JS.setPosition(JEWEL_SERVO_UP);
+                if (!isStopRequested() && opModeIsActive()) delay(500);
+                if (!isStopRequested() && opModeIsActive())  drive(-.15, 0, 0, JEWEL_TURN_TIME);
+            } else if (get_colors() == JewelPosition.RED_JEWEL_RIGHT && !isStopRequested() && opModeIsActive()) {
+                if (!isStopRequested() && opModeIsActive())  drive(-.15, 0, 0, JEWEL_TURN_TIME);
+                if (!isStopRequested() && opModeIsActive())  JS.setPosition(JEWEL_SERVO_UP);
+                if (!isStopRequested() && opModeIsActive())  delay(500);
+                if (!isStopRequested() && opModeIsActive())   drive(.15, 0, 0, JEWEL_TURN_TIME);
             } else {
-                JS.setPosition(JEWEL_SERVO_UP);
-                delay(1500);
+                if (!isStopRequested() && opModeIsActive())  JS.setPosition(JEWEL_SERVO_UP);
+                if (!isStopRequested() && opModeIsActive())  delay(500);
             }
         } else {
-            if (get_colors() == JewelPosition.RED_JEWEL_RIGHT) {
-                drive(.15, 0, 0, JEWEL_TURN_TIME);
-                JS.setPosition(JEWEL_SERVO_UP);
-                delay(1500);
-                drive(-.15, 0, 0, JEWEL_TURN_TIME);
+            if (get_colors() == JewelPosition.RED_JEWEL_RIGHT && !isStopRequested() && opModeIsActive()) {
+                if (!isStopRequested() && opModeIsActive())  drive(.15, 0, 0, JEWEL_TURN_TIME);
+                if (!isStopRequested() && opModeIsActive())  JS.setPosition(JEWEL_SERVO_UP);
+                if (!isStopRequested() && opModeIsActive())  delay(500);
+                if (!isStopRequested() && opModeIsActive())  drive(-.15, 0, 0, JEWEL_TURN_TIME);
             } else if (get_colors() == JewelPosition.RED_JEWEL_LEFT) {
-                drive(-.15, 0, 0, JEWEL_TURN_TIME);
-                JS.setPosition(JEWEL_SERVO_UP);
-                delay(1500);
-                drive(.15, 0, 0, JEWEL_TURN_TIME);
+                if (!isStopRequested() && opModeIsActive())  drive(-.15, 0, 0, JEWEL_TURN_TIME);
+                if (!isStopRequested() && opModeIsActive())   JS.setPosition(JEWEL_SERVO_UP);
+                if (!isStopRequested() && opModeIsActive())  delay(500);
+                if (!isStopRequested() && opModeIsActive())  drive(.15, 0, 0, JEWEL_TURN_TIME);
             } else {
-                JS.setPosition(JEWEL_SERVO_UP);
-                delay(1500);
+                if (!isStopRequested() && opModeIsActive())   JS.setPosition(JEWEL_SERVO_UP);
+                if (!isStopRequested() && opModeIsActive())  delay(500);
             }
         }
     }
@@ -224,32 +339,18 @@ public abstract class AutoBase extends LinearOpMode {
     public void delay(int time) {
         telemetry.addData("delay", "started delay");
         clock.reset();
-        while (time > clock.milliseconds()) {
+        while (!isStopRequested() && opModeIsActive() && time > clock.milliseconds()) {
             telemetry.addData("time: ", clock.milliseconds());
             telemetry.update();
         }
     }
 
-    public void strafe(boolean strafe) {
-        FR.setDirection(strafe ? DcMotor.Direction.FORWARD : DcMotor.Direction.REVERSE);
-        FL.setDirection(strafe ? DcMotor.Direction.FORWARD : DcMotor.Direction.FORWARD);
-        BR.setDirection(strafe ? DcMotor.Direction.REVERSE : DcMotor.Direction.REVERSE);
-        BL.setDirection(strafe ? DcMotor.Direction.REVERSE : DcMotor.Direction.FORWARD);
-    }
-
     public void drive(double turn, double drive_x, double drive_y, double time) {
         counter = getRuntime() * 1000.0;
-        while (getRuntime() * 1000.0 < counter + time) {
+        while (!isStopRequested() && opModeIsActive() && getRuntime() * 1000.0 < counter + time) {
             drive(turn, drive_x, drive_y);
         }
         stopRobot();
-    }
-
-    public void stopRobot(double time) {
-        counter = getRuntime() * 1000.0;
-        while (getRuntime() * 1000.0 < counter + time) {
-            drive(0, 0, 0);
-        }
     }
 
     public void stopRobot() {
@@ -270,10 +371,8 @@ public abstract class AutoBase extends LinearOpMode {
         if (Math.abs(drive_y) > .15) {
             telemetry.addData("Status", "Driving");
             strafe(false);
-
             leftPower = Range.clip(drive_y + turn, -1.0, 1.0);
             rightPower = Range.clip(drive_y - turn, -1.0, 1.0);
-
             FL.setPower(leftPower);
             BL.setPower(leftPower);
             FR.setPower(rightPower);
@@ -286,8 +385,8 @@ public abstract class AutoBase extends LinearOpMode {
             rightPower = Range.clip(drive_x - turn, -1.0, 1.0);
 
             FL.setPower(leftPower);
-            BL.setPower(rightPower);
-            FR.setPower(leftPower);
+            BL.setPower(1.25 * rightPower);
+            FR.setPower(1.25 * leftPower);
             BR.setPower(rightPower);
         } else {
             telemetry.addData("Status", "Turning");
@@ -308,14 +407,18 @@ public abstract class AutoBase extends LinearOpMode {
         FR.setPower(0);
         BR.setPower(0);
     }
+    /*
+     * Code to run REPEATEDLY after the driver hits PLAY but before they hit STOP
+     */
 
-    public JewelPosition get_colors() {
-        /*
+
+    /*
     * The function currently returns the location of the Red Jewel.
     * It can be refactored later to return a color based on the
     * alliance, but this version makes no assumption about what jewel
     * the user wants to know about.
     */
+    public JewelPosition get_colors() {
         if (CBL.red() > CBL.blue()) {
             return JewelPosition.RED_JEWEL_RIGHT;
         } else if (CBL.red() < CBL.blue()) {
@@ -334,7 +437,9 @@ public abstract class AutoBase extends LinearOpMode {
         return getAlliance() == Alliance.BLUE;
     }
 
-    //Close the grabber:
+    /**
+     * Close the grabber
+     */
     void closeGrabber() {
         if (SR.getPosition() != RIGHT_SERVO_CLOSED) {
             SR.setPosition(RIGHT_SERVO_CLOSED);
@@ -342,7 +447,9 @@ public abstract class AutoBase extends LinearOpMode {
         }
     }
 
-    //Open the grabber:
+    /**
+     * Open the grabber
+     */
     void openGrabber() {
         SR.setPosition(RIGHT_SERVO_OPEN);
         SL.setPosition(LEFT_SERVO_OPEN);
@@ -404,16 +511,18 @@ public abstract class AutoBase extends LinearOpMode {
     }
 
     public RelicRecoveryVuMark getPicto() {
+        int counts = 0;
         RelicRecoveryVuMark vuMark = RelicRecoveryVuMark.from(relicTemplate);
         if (vuMark != RelicRecoveryVuMark.UNKNOWN) {
             return vuMark;
         }
         clock.reset();
-        while (clock.milliseconds() < 2000) {
+        while (!isStopRequested() && opModeIsActive() && clock.milliseconds() < 2000 && counts < 50) {
             vuMark = RelicRecoveryVuMark.from(relicTemplate);
             if (vuMark != RelicRecoveryVuMark.UNKNOWN) {
                 return vuMark;
             }
+            counts++;
         }
         return vuMark;
     }
@@ -427,7 +536,7 @@ public abstract class AutoBase extends LinearOpMode {
         telemetry.addData("test", "test");
         clock.reset();
         double startingAngle = angle();
-        while (6000 > clock.milliseconds() && getAngleDiff(startingAngle, angle()) < angle) {
+        while (!isStopRequested() && opModeIsActive() && 6000 > clock.milliseconds() && getAngleDiff(startingAngle, angle()) < angle) {
             telemetry.addData("not working", "plz");
             telemetry.addData("angleDiff", getAngleDiff(startingAngle, angle()));
             telemetry.addData("startingAngle", startingAngle);
@@ -455,26 +564,8 @@ public abstract class AutoBase extends LinearOpMode {
         ultrasonicRight = hardwareMap.get(AnalogInput.class, "ultrasonicRight");
     }
 
-    public double averageQueue(Queue<Double> q) {
-        double sum = 0.0;
-        for(double d : q) {
-            sum += d;
-        }
-        return sum/q.size();
-    }
-
     int i;
     public double getLeftDist() {
-//        if(smooth_left == null) {
-//            smooth_left.add(0.0);
-//            smooth_left.add(0.0);
-//            smooth_left.add(0.0);
-//            smooth_left.add(0.0);
-//            smooth_left.add(0.0);
-//        }
-//        smooth_left.remove();
-//        smooth_left.add(ultrasonicLeft.getVoltage() * 1000 / 6.4);
-//        return averageQueue(smooth_left);
         return ultrasonicLeft.getVoltage() * 1000 / 6.4;
     }
     public double getRightDist() {
@@ -484,79 +575,29 @@ public abstract class AutoBase extends LinearOpMode {
         return ultrasonicBack.getVoltage() * 1000 / 6.4;
     }
 
-    public void driveUntilLeft(double power, double desiredDist, double tolerance) {
-        int counts = 0;
-        while(counts < 3) {
-            if(!(getLeftDist() < desiredDist + tolerance && getLeftDist() > desiredDist - tolerance)) {
-                counts = 0;
-                telemetry.addData("left", getLeftDist());
-                if (getLeftDist() < desiredDist - tolerance) {
-                    drive(0, power, 0);
-                } else {
-                    drive(0, -power, 0);
-                }
-                telemetry.addData("count", counts);
-            } else {
-                drive(0, 0, 0);
-                counts++;
-                telemetry.addData("count", counts);
-            }
-            telemetry.update();
-        }
-        drive(0, 0, 0);
-    }
-    public void driveUntilRight(double power, double desiredDist, double tolerance) {
-        int counts = 0;
-        while(counts < 3) {
-            if (!(getRightDist() < desiredDist + tolerance && getRightDist() > desiredDist - tolerance)) {
-                counts = 0;
-                telemetry.addData("right", getRightDist());
-                if (getRightDist() < desiredDist - tolerance) {
-                    drive(0, -power, 0);
-                } else {
-                    drive(0, power, 0);
-                }
-                telemetry.addData("count", counts);
-            } else {
-                drive(0, 0, 0);
-                counts++;
-                telemetry.addData("count", counts);
-            }
-            telemetry.update();
-        }
-        drive(0, 0, 0);
-    }
-    public void driveUntilBack(double power, double desiredDist, double tolerance) {
-        int counts = 0;
-        while(counts < 3) {
-            if (!(getBackDist() < desiredDist + tolerance && getBackDist() > desiredDist - tolerance)) {
-                counts = 0;
-                telemetry.addData("back", getBackDist());
-                if (getBackDist() < desiredDist - tolerance) {
-                    drive(0, 0, power);
-                } else {
-                    drive(0, 0, -power);
-                }
-                telemetry.addData("count", counts);
-            } else {
-                drive(0, 0, 0);
-                counts++;
-                telemetry.addData("count", counts);
-            }
-            telemetry.update();
-        }
-        drive(0, 0, 0);
-    }
 
     public void driveUntilColorRed(double power) {
-        while (CBOT.red() < 15) {
+        while (!isStopRequested() && opModeIsActive() && CBOT.red() < 15) {
             drive(0, power, 0);
+        }
+        drive(0, 0, 0);
+    }
+    public void driveUntilColorRedForward(double power) {
+        while (!isStopRequested() && opModeIsActive() && CBOT.red() < 15) {
+            drive(0, 0, power);
         }
         drive(0, 0, 0);
     }
     public void driveUntilColorBlue(double power) {
-        while (CBOT.blue() < 12) {
+        while (!isStopRequested() && opModeIsActive() && CBOT.blue() < 12) {
             drive(0, power, 0);
+        }
+        drive(0, 0, 0);
+    }
+
+    public void driveUntilColorBlueForward(double power) {
+        while (!isStopRequested() && opModeIsActive() && CBOT.blue() < 12) {
+            drive(0, 0, power);
         }
         drive(0, 0, 0);
     }

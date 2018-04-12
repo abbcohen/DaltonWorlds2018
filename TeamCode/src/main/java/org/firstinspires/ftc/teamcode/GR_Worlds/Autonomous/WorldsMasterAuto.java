@@ -20,7 +20,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackable;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackables;
 
-abstract class WorldsMasterAuto extends LinearOpMode {
+abstract class  WorldsMasterAuto extends LinearOpMode {
 
     //***********************************HARDWARE INSTANTIATIONS************************************
 
@@ -34,6 +34,7 @@ abstract class WorldsMasterAuto extends LinearOpMode {
     public DcMotor FrontRight = null;
     public DcMotor BackLeft = null;
     public DcMotor BackRight = null;
+    public int pos = 0;
     public DcMotor Pulley = null;
     public DcMotor NomLeft = null;
     public DcMotor NomRight = null;
@@ -91,8 +92,31 @@ abstract class WorldsMasterAuto extends LinearOpMode {
         BackRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         colorServo.setPosition(.95);
+        pos = getTicks();
     }
-
+    public int getTicks() {
+        return FrontRight.getCurrentPosition() - pos;
+    }
+    public void resetTicks() {
+        pos = FrontRight.getCurrentPosition();
+    }
+    public void moveTicks(double pow, double ticks) {
+        resetTicks();
+        runtime.reset();
+        while (opModeIsActive() && !isStopRequested() && Math.abs(getTicks()) < ticks && runtime.milliseconds() < 10000) {
+            FrontLeft.setPower(pow);
+            FrontRight.setPower(pow);
+            BackRight.setPower(pow);
+            BackLeft.setPower(pow);
+            telemetry.addData("Target", ticks);
+            telemetry.addData("Current", getTicks());
+            telemetry.update();
+        }
+        FrontLeft.setPower(0);
+        FrontRight.setPower(0);
+        BackRight.setPower(0);
+        BackLeft.setPower(0);
+    }
     public void initGyro() {
         BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
         parameters.angleUnit = BNO055IMU.AngleUnit.DEGREES;
@@ -186,9 +210,9 @@ abstract class WorldsMasterAuto extends LinearOpMode {
     }
 
     public void strafeRight(double power, int time) {
-        FrontLeft.setPower(-power);
+        FrontLeft.setPower(power);
         FrontRight.setPower(-power);
-        BackLeft.setPower(power);
+        BackLeft.setPower(-power);
         BackRight.setPower(power);
         delay(time);
         FrontLeft.setPower(0);
@@ -198,9 +222,9 @@ abstract class WorldsMasterAuto extends LinearOpMode {
     }
 
     public void strafeLeft(double power, int time) {
-        FrontLeft.setPower(power);
+        FrontLeft.setPower(-power);
         FrontRight.setPower(power);
-        BackLeft.setPower(-power);
+        BackLeft.setPower(power);
         BackRight.setPower(-power);
         delay(time);
         FrontLeft.setPower(0);

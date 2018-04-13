@@ -24,11 +24,8 @@ abstract class  WorldsMasterAuto extends LinearOpMode {
 
     //***********************************HARDWARE INSTANTIATIONS************************************
 
-    //motor + servos
+    //motor + servos and stuff
     ColorSensor colorSensor;
-
-
-    // Declare OpMode members.
     public ElapsedTime runtime = new ElapsedTime();
     public DcMotor FrontLeft = null;
     public DcMotor FrontRight = null;
@@ -39,7 +36,8 @@ abstract class  WorldsMasterAuto extends LinearOpMode {
     public DcMotor NomLeft = null;
     public DcMotor NomRight = null;
     public Servo Servo1 = null;
-    public Servo colorServo = null;
+    public Servo VerticalColorServo = null;
+    public Servo HorizontalColorServo = null;
     double startTime = runtime.milliseconds();
 
     //imu
@@ -48,10 +46,20 @@ abstract class  WorldsMasterAuto extends LinearOpMode {
     Acceleration gravity;
 
     //other things
-    double JEWEL_DOWN_POS = .95;
     ElapsedTime clock = new ElapsedTime();
     public double veryStartAngle;
     static final double COLUMN_TURN_ANGLE = 15;
+
+    // TODO from abby: 4/12/18 test/change these servo positions, they are complete guesses
+    //jewel servo positions
+    static final double VERTICAL_JEWELSERVO_UP = .95;
+    static final double VERTICAL_JEWELSERVO_MID = .5;
+    static final double VERTICAL_JEWELSERVO_DOWN = 0;
+    static final double HORIZONTAL_JEWELSERVO_MID = .63;
+    static final double HORIZONTAL_JEWELSERVO_TURN = .2; //how much the color servo should turn in either direction
+    static final double HORIZONTAL_JEWELSERVO_CCW = HORIZONTAL_JEWELSERVO_MID - HORIZONTAL_JEWELSERVO_TURN;
+    static final double HORIZONTAL_JEWELSERVO_CW = HORIZONTAL_JEWELSERVO_MID + HORIZONTAL_JEWELSERVO_TURN;
+
 
     //vuforia
     OpenGLMatrix lastLocation = null;
@@ -71,7 +79,8 @@ abstract class  WorldsMasterAuto extends LinearOpMode {
         Pulley = hardwareMap.get(DcMotor.class, "Pulley");
         Servo1 = hardwareMap.get(Servo.class, "Servo1");
         colorSensor = hardwareMap.get(ColorSensor.class, "colorSensor");
-        colorServo = hardwareMap.get(Servo.class, "colorServo");
+        VerticalColorServo = hardwareMap.get(Servo.class, "colorServo");
+        HorizontalColorServo = hardwareMap.get(Servo.class, "jewelTwister");
         NomLeft = hardwareMap.get(DcMotor.class, "NomLeft");
         NomRight = hardwareMap.get(DcMotor.class, "NomRight");
 
@@ -91,15 +100,19 @@ abstract class  WorldsMasterAuto extends LinearOpMode {
         FrontRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         BackRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
-        colorServo.setPosition(.95);
+        VerticalColorServo.setPosition(VERTICAL_JEWELSERVO_UP);
+        HorizontalColorServo.setPosition(HORIZONTAL_JEWELSERVO_MID);
         pos = getTicks();
     }
+
     public int getTicks() {
         return FrontRight.getCurrentPosition() - pos;
     }
+
     public void resetTicks() {
         pos = FrontRight.getCurrentPosition();
     }
+
     public void moveTicks(double pow, double ticks) {
         resetTicks();
         runtime.reset();
@@ -117,6 +130,7 @@ abstract class  WorldsMasterAuto extends LinearOpMode {
         BackRight.setPower(0);
         BackLeft.setPower(0);
     }
+
     public void initGyro() {
         BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
         parameters.angleUnit = BNO055IMU.AngleUnit.DEGREES;
@@ -378,11 +392,11 @@ abstract class  WorldsMasterAuto extends LinearOpMode {
 
     //*******************************SEQUENCE MOTION FUNCTIONS******************************************
     public void jewelSequence(String team) throws InterruptedException {
-        double JEWEL_TURN_ANGLE = 15;
-        double direction = 0;
+        String direction = "ERROR";
+        VerticalColorServo.setPosition(VERTICAL_JEWELSERVO_DOWN);
+        Boolean jewelBlue = null;
+        Boolean jewel_has_been_spotted;
 
-        colorServo.setPosition(0);
-        Boolean jewelBlue;
         //read color
         int red = 0;
         int blue = 0;
@@ -391,32 +405,45 @@ abstract class  WorldsMasterAuto extends LinearOpMode {
             if (colorSensor.red() < colorSensor.blue() && colorSensor.blue() > .15) blue++;
         }
         telemetry.addLine("read color");
+        telemetry.update();
 
         //decide which color we see
         if (blue > red) {
             jewelBlue = true;
             telemetry.addData("blueWins!", blue);
-        } else {
+            jewel_has_been_spotted = true;
+        } else if (red > blue){
             jewelBlue = false;
             telemetry.addData("redWins!", red);
+            jewel_has_been_spotted = true;
+        } else { //if the color sensor doesn't see either red or blue
+            jewel_has_been_spotted = false;
+            telemetry.addLine("DIDN'T SEE A JEWEL");
         }
         telemetry.addData("blue: ", blue);
         telemetry.addData("red: ", red);
         telemetry.update();
 
         //figure out which way to turn to knock off correct jewel
-        if (team == "red") {
-            if(jewelBlue) direction = 1; //turn right first
-            else direction = -1; //turn left first
-        } else if (team =="blue"){
-            if(!jewelBlue) direction = 1; //turn right first
-            else direction = -1; //turn left first
+        if(jewel_has_been_spotted) { //so we dont knock off a rando one if we see nothing
+            if (team == "red") {
+                if (jewelBlue) direction = "CW"; //turn clockwise
+                else direction = "CCW"; //turn counterclockwise
+            } else if (team == "blue") {
+                if (!jewelBlue) direction = "CW"; //turn clockwise
+                else direction = "CCW"; //turn counterclockwise
+            }
+            //knock off the correct jewel
+            if (direction == "CW") HorizontalColorServo.setPosition(HORIZONTAL_JEWELSERVO_CW);
+            else if (direction == "CCW") HorizontalColorServo.setPosition(HORIZONTAL_JEWELSERVO_CCW);
+            delay(100);
         }
-        //knock off the correct jewel
-        turnAngle(JEWEL_TURN_ANGLE * direction);
+        VerticalColorServo.setPosition(VERTICAL_JEWELSERVO_MID);
+        delay(50);
+        HorizontalColorServo.setPosition(HORIZONTAL_JEWELSERVO_MID);
+        delay(50);
+        VerticalColorServo.setPosition(VERTICAL_JEWELSERVO_UP);
         delay(100);
-        colorServo.setPosition(0.95);
-        turnAngle(-(JEWEL_TURN_ANGLE * direction));
     }
 
     public void turnToColumnSequence(RelicRecoveryVuMark column, int startOffset) throws InterruptedException {
@@ -429,13 +456,16 @@ abstract class  WorldsMasterAuto extends LinearOpMode {
             turnAngle(COLUMN_TURN_ANGLE);//fill w right value
         }
     }
+
     public void returntoCenterSequence(RelicRecoveryVuMark column, int startOffset) throws InterruptedException {
         if (column == RelicRecoveryVuMark.CENTER) {
         } else if (column == RelicRecoveryVuMark.LEFT || column == RelicRecoveryVuMark.UNKNOWN) {
             turnAngle(COLUMN_TURN_ANGLE);//fill w left value
         } else turnAngle(-COLUMN_TURN_ANGLE);//fill w right value
     }
+
     public void placeGlyphSequence(RelicRecoveryVuMark column) throws InterruptedException {
+        // TODO from abby: 4/12/18 change the driving in this func to encoder:
         Servo1.setPosition(0.9);
         delay(250);
         moveBackward(.4, 500);

@@ -112,15 +112,27 @@ abstract class  WorldsMasterAuto extends LinearOpMode {
     public void resetTicks() {
         pos = FrontRight.getCurrentPosition();
     }
+    public void moveTicksForward(double pow, double ticks) {
+        moveTicks(pow, pow, pow, pow, ticks);
+    }
+    public void moveTicksBack(double pow, double ticks) {
+        moveTicks(-pow, -pow, -pow, -pow, -ticks);
+    }
+    public void moveTicksLeft(double pow, double ticks) {
+        moveTicks(-pow, pow, -pow, pow, ticks);
+    }
+    public void moveTicksRight(double pow, double ticks) {
+        moveTicks(pow, -pow, pow, -pow, -ticks);
+    }
 
-    public void moveTicks(double pow, double ticks) {
+    private void moveTicks(double fl, double bl, double fr, double br, double ticks) {
         resetTicks();
         runtime.reset();
-        while (opModeIsActive() && !isStopRequested() && Math.abs(getTicks()) < ticks && runtime.milliseconds() < 10000) {
-            FrontLeft.setPower(pow);
-            FrontRight.setPower(pow);
-            BackRight.setPower(pow);
-            BackLeft.setPower(pow);
+        while (opModeIsActive() && !isStopRequested() && Math.abs(getTicks()) < Math.abs(ticks) && runtime.milliseconds() < 10000) {
+            FrontLeft.setPower(fl);
+            FrontRight.setPower(fr);
+            BackRight.setPower(br);
+            BackLeft.setPower(bl);
             telemetry.addData("Target", ticks);
             telemetry.addData("Current", getTicks());
             telemetry.update();
@@ -466,7 +478,7 @@ abstract class  WorldsMasterAuto extends LinearOpMode {
 
     public void placeGlyphSequence(RelicRecoveryVuMark column) throws InterruptedException {
         // TODO from abby: 4/12/18 change the driving in this func to encoder:
-        Servo1.setPosition(0.9);
+        Servo1.setPosition(0.5);
         delay(250);
         moveBackward(.4, 500);
         delay(500);

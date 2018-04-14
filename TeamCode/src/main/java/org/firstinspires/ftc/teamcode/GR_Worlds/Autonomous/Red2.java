@@ -16,18 +16,24 @@ public class Red2 extends WorldsMasterAuto {
         setStartAngle();
         waitForStart();
 
-        while (opModeIsActive()) {
-            RelicRecoveryVuMark column = getPicto();
-            //jewelSequence("red");
-            delay(200);
-            // TODO from abby: 4/12/18 change to encoder:
-            moveTicksBack(.4,1000);
-            delay(950);
-            moveTicksRight(.6, 900);
-            delay(200);
-            // TODO from abby: 4/12/18 test this angle:
-            turnToColumnSequence(column, 0);
-            placeGlyphSequence(column);
+        while (opModeIsActive() && !isStopRequested()) {
+            VerticalColorServo.setPosition(VERTICAL_JEWELSERVO_UP);
+            delay(1000);
+            VerticalColorServo.setPosition(VERTICAL_JEWELSERVO_DOWN);
+            delay(1000);
+            VerticalColorServo.setPosition(VERTICAL_JEWELSERVO_MID);
+            delay(1000);
+//            RelicRecoveryVuMark column = getPicto();
+//            jewelSequence("red");
+//            delay(200);
+//            // TODO from abby: 4/12/18 fix encoder:
+//            moveTicksBack(.4,1000);
+//            delay(950);
+//            moveTicksRight(.6, 900);
+//            delay(200);
+//            // TODO from abby: 4/12/18 test this angle:
+//            turnToColumnSequence(column, 0);
+//            placeGlyphSequence(column);
             break;
         }
     }

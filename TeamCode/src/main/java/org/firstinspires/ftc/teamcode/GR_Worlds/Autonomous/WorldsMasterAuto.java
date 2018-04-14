@@ -52,11 +52,11 @@ abstract class  WorldsMasterAuto extends LinearOpMode {
 
     // TODO from abby: 4/12/18 test/change these servo positions, they are complete guesses
     //jewel servo positions
-    static final double VERTICAL_JEWELSERVO_UP = .95;
-    static final double VERTICAL_JEWELSERVO_MID = .5;
-    static final double VERTICAL_JEWELSERVO_DOWN = 0;
-    static final double HORIZONTAL_JEWELSERVO_MID = .63;
-    static final double HORIZONTAL_JEWELSERVO_TURN = .2; //how much the color servo should turn in either direction
+    static final double VERTICAL_JEWELSERVO_UP = .9;
+    static final double VERTICAL_JEWELSERVO_MID = .6;
+    static final double VERTICAL_JEWELSERVO_DOWN = .3;
+    static final double HORIZONTAL_JEWELSERVO_MID = .73;
+    static final double HORIZONTAL_JEWELSERVO_TURN = .1; //how much the color servo should turn in either direction
     static final double HORIZONTAL_JEWELSERVO_CCW = HORIZONTAL_JEWELSERVO_MID - HORIZONTAL_JEWELSERVO_TURN;
     static final double HORIZONTAL_JEWELSERVO_CW = HORIZONTAL_JEWELSERVO_MID + HORIZONTAL_JEWELSERVO_TURN;
 
@@ -408,55 +408,55 @@ abstract class  WorldsMasterAuto extends LinearOpMode {
         VerticalColorServo.setPosition(VERTICAL_JEWELSERVO_DOWN);
         Boolean jewelBlue = null;
         Boolean jewel_has_been_spotted;
-
-        //read color
-        int red = 0;
-        int blue = 0;
-        for (int i = 0; i < 40; i++) {
-            if (colorSensor.red() > colorSensor.blue() && colorSensor.red() > .15) red++;
-            if (colorSensor.red() < colorSensor.blue() && colorSensor.blue() > .15) blue++;
-        }
-        telemetry.addLine("read color");
-        telemetry.update();
-
-        //decide which color we see
-        if (blue > red) {
-            jewelBlue = true;
-            telemetry.addData("blueWins!", blue);
-            jewel_has_been_spotted = true;
-        } else if (red > blue){
-            jewelBlue = false;
-            telemetry.addData("redWins!", red);
-            jewel_has_been_spotted = true;
-        } else { //if the color sensor doesn't see either red or blue
-            jewel_has_been_spotted = false;
-            telemetry.addLine("DIDN'T SEE A JEWEL");
-        }
-        telemetry.addData("blue: ", blue);
-        telemetry.addData("red: ", red);
-        telemetry.update();
-
-        //figure out which way to turn to knock off correct jewel
-        if(jewel_has_been_spotted) { //so we dont knock off a rando one if we see nothing
-            if (team == "red") {
-                if (jewelBlue) direction = "CW"; //turn clockwise
-                else direction = "CCW"; //turn counterclockwise
-            } else if (team == "blue") {
-                if (!jewelBlue) direction = "CW"; //turn clockwise
-                else direction = "CCW"; //turn counterclockwise
+            //read color
+            int red = 0;
+            int blue = 0;
+            for (int i = 0; i < 40; i++) {
+                if (colorSensor.red() > colorSensor.blue() && colorSensor.red() > .15) red++;
+                if (colorSensor.red() < colorSensor.blue() && colorSensor.blue() > .15) blue++;
             }
-            //knock off the correct jewel
-            if (direction == "CW") HorizontalColorServo.setPosition(HORIZONTAL_JEWELSERVO_CW);
-            else if (direction == "CCW") HorizontalColorServo.setPosition(HORIZONTAL_JEWELSERVO_CCW);
-            delay(100);
+            telemetry.addLine("read color");
+            telemetry.update();
+
+            //decide which color we see
+            if (blue > red) {
+                jewelBlue = true;
+                telemetry.addData("blueWins!", blue);
+                jewel_has_been_spotted = true;
+            } else if (red > blue) {
+                jewelBlue = false;
+                telemetry.addData("redWins!", red);
+                jewel_has_been_spotted = true;
+            } else { //if the color sensor doesn't see either red or blue
+                jewel_has_been_spotted = false;
+                telemetry.addLine("DIDN'T SEE A JEWEL");
+            }
+            telemetry.addData("blue: ", blue);
+            telemetry.addData("red: ", red);
+            telemetry.update();
+
+            //figure out which way to turn to knock off correct jewel
+            if (jewel_has_been_spotted) { //so we dont knock off a rando one if we see nothing
+                if (team == "red") {
+                    if (jewelBlue) direction = "CW"; //turn clockwise
+                    else direction = "CCW"; //turn counterclockwise
+                } else if (team == "blue") {
+                    if (!jewelBlue) direction = "CW"; //turn clockwise
+                    else direction = "CCW"; //turn counterclockwise
+                }
+                //knock off the correct jewel
+                if (direction == "CW") HorizontalColorServo.setPosition(HORIZONTAL_JEWELSERVO_CW);
+                else if (direction == "CCW")
+                    HorizontalColorServo.setPosition(HORIZONTAL_JEWELSERVO_CCW);
+                delay(500);
+            }
+            VerticalColorServo.setPosition(VERTICAL_JEWELSERVO_MID);
+            delay(150);
+            HorizontalColorServo.setPosition(HORIZONTAL_JEWELSERVO_MID);
+            delay(150);
+            VerticalColorServo.setPosition(VERTICAL_JEWELSERVO_UP);
+            delay(200);
         }
-        VerticalColorServo.setPosition(VERTICAL_JEWELSERVO_MID);
-        delay(50);
-        HorizontalColorServo.setPosition(HORIZONTAL_JEWELSERVO_MID);
-        delay(50);
-        VerticalColorServo.setPosition(VERTICAL_JEWELSERVO_UP);
-        delay(100);
-    }
 
     public void turnToColumnSequence(RelicRecoveryVuMark column, int startOffset) throws InterruptedException {
         turnAngle(currentAngle() - (veryStartAngle-startOffset));

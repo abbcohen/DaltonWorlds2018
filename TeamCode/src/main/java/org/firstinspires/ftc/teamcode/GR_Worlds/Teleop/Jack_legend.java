@@ -6,8 +6,8 @@ import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
-@TeleOp(name="laeo_is_better02", group="Iterative Opmode")
-public class Ava extends OpMode {
+@TeleOp(name="massive legend jack", group="Iterative Opmode")
+public class Jack_legend extends OpMode {
 
     // Declare OpMode members.
     private ElapsedTime runtime = new ElapsedTime();
@@ -103,26 +103,26 @@ public class Ava extends OpMode {
         double threshold = 0.5;
         double slowNumber = 0.95;
 
-        if (gamepad1.right_stick_x < -threshold || gamepad1.right_stick_x > threshold) {
+        if (gamepad1.left_stick_x < -threshold || gamepad1.left_stick_x > threshold) {
             if(gamepad1.left_bumper){
-                FrontLeft.setPower(gamepad1.right_stick_x/2);
-                FrontRight.setPower(-gamepad1.right_stick_x/2);
-                BackLeft.setPower(-gamepad1.right_stick_x/2);
-                BackRight.setPower(gamepad1.right_stick_x/2);
+                FrontLeft.setPower(gamepad1.left_stick_x/2);
+                FrontRight.setPower(-gamepad1.left_stick_x/2);
+                BackLeft.setPower(-gamepad1.left_stick_x/2);
+                BackRight.setPower(gamepad1.left_stick_x/2);
             }
             else{
-                FrontLeft.setPower(gamepad1.right_stick_x);
-                FrontRight.setPower(-gamepad1.right_stick_x);
-                BackLeft.setPower(-gamepad1.right_stick_x);
-                BackRight.setPower(gamepad1.right_stick_x);
+                FrontLeft.setPower(gamepad1.left_stick_x);
+                FrontRight.setPower(-gamepad1.left_stick_x);
+                BackLeft.setPower(-gamepad1.left_stick_x);
+                BackRight.setPower(gamepad1.left_stick_x);
             }
 
-        } else if (gamepad1.left_stick_y < -threshold || gamepad1.left_stick_y > threshold || gamepad1.left_stick_x < -threshold || gamepad1.left_stick_x > threshold) {
+        } else if (gamepad1.left_stick_y < -threshold || gamepad1.left_stick_y > threshold || gamepad1.right_stick_x < -threshold || gamepad1.right_stick_x > threshold) {
             double leftPower;
             double rightPower;
 
             double drive = -gamepad1.left_stick_y;
-            double turn = gamepad1.left_stick_x;
+            double turn = gamepad1.right_stick_x;
             //make sure left and right power are outside thres
             leftPower = Range.clip(drive + turn, -1.0, 1.0);
             rightPower = Range.clip(drive - turn, -1.0, 1.0);
@@ -240,10 +240,10 @@ public class Ava extends OpMode {
 
         //relic hand
         if(gamepad2.right_trigger>.4){
-            handServo.setPosition(.45);
+            handServo.setPosition(.9);
         }
         else if(gamepad2.left_trigger>.4){
-            handServo.setPosition(.9);
+            handServo.setPosition(.45);
         }
 
         telemetry.addData("handServo", handServo.getPosition());

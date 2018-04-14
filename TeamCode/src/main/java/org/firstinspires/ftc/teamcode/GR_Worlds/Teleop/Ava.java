@@ -221,9 +221,9 @@ public class Ava extends OpMode {
 
         //relic placer
 
-        if(gamepad2.right_stick_y > .4){
+        if(gamepad2.right_stick_y < -.4){
             relicMotor.setPower(-.6);
-        }else if(gamepad2.right_stick_y < -.4){
+        }else if(gamepad2.right_stick_y > .4){
             relicMotor.setPower(.6);
         }
         else{

@@ -19,9 +19,9 @@ public class Red1 extends WorldsMasterAuto {
         while (opModeIsActive()) {
             RelicRecoveryVuMark column = getPicto();
             jewelSequence("red");
-            delay(200);
+            sleep(200);
             moveTicksBack(.4, 2000);
-            delay(200);
+            sleep(200);
             turnToColumnSequence(column);
             placeGlyphSequence(column);
             break;

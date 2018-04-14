@@ -198,11 +198,11 @@ abstract class  WorldsMasterAuto extends LinearOpMode {
         telemetry.addData("relic", "activated");
     }
 
-    public void delay(int time) {
-        double startTime = runtime.milliseconds();
-        while (runtime.milliseconds() - startTime < time) {
-        }
-    }
+//    public void delay(int time) { DO NOT USE DELAY IT IS CODE CANCER
+//        double startTime = runtime.milliseconds();
+//        while (runtime.milliseconds() - startTime < time && opModeIsActive()) {
+//        }
+//    }
 
     //***************************************MOTION FUNCTIONS***************************************
     public void StopDriving(){
@@ -217,7 +217,7 @@ abstract class  WorldsMasterAuto extends LinearOpMode {
         FrontRight.setPower(power);
         BackLeft.setPower(power);
         BackRight.setPower(power);
-        delay(time);
+        sleep(time);
         FrontLeft.setPower(0);
         FrontRight.setPower(0);
         BackLeft.setPower(0);
@@ -229,7 +229,7 @@ abstract class  WorldsMasterAuto extends LinearOpMode {
         FrontRight.setPower(-power);
         BackLeft.setPower(-power);
         BackRight.setPower(-power);
-        delay(time);
+        sleep(time);
         FrontLeft.setPower(0);
         FrontRight.setPower(0);
         BackLeft.setPower(0);
@@ -241,7 +241,7 @@ abstract class  WorldsMasterAuto extends LinearOpMode {
         FrontRight.setPower(-power);
         BackLeft.setPower(-power);
         BackRight.setPower(power);
-        delay(time);
+        sleep(time);
         FrontLeft.setPower(0);
         FrontRight.setPower(0);
         BackLeft.setPower(0);
@@ -253,7 +253,7 @@ abstract class  WorldsMasterAuto extends LinearOpMode {
         FrontRight.setPower(power);
         BackLeft.setPower(power);
         BackRight.setPower(-power);
-        delay(time);
+        sleep(time);
         FrontLeft.setPower(0);
         FrontRight.setPower(0);
         BackLeft.setPower(0);
@@ -262,13 +262,13 @@ abstract class  WorldsMasterAuto extends LinearOpMode {
 
     public void turnRight(double power, int time) {
         turn(power);
-        delay(time);
+        sleep(time);
         StopDriving();
     }
 
     public void turnLeft(double power, int time) {
         turn(-power);
-        delay(time);
+        sleep(time);
         StopDriving();
     }
 
@@ -289,7 +289,7 @@ abstract class  WorldsMasterAuto extends LinearOpMode {
             return vuMark;
         }
         clock.reset();
-        while (clock.milliseconds() < 2000) {
+        while (clock.milliseconds() < 2000 && opModeIsActive()) {
             vuMark = RelicRecoveryVuMark.from(relicTemplate);
             if (vuMark != RelicRecoveryVuMark.UNKNOWN) {
                 telemetry.addData("Mark", vuMark);
@@ -309,7 +309,7 @@ abstract class  WorldsMasterAuto extends LinearOpMode {
         if (vuMark != RelicRecoveryVuMark.UNKNOWN) {
             return vuMark;
         } else {
-            while (startTime - getRuntime() < 2000) {
+            while (startTime - getRuntime() < 2000 && opModeIsActive()) {
                 vuMark = RelicRecoveryVuMark.from(relicTemplate);
                 if (vuMark != RelicRecoveryVuMark.UNKNOWN) {
                     return vuMark;
@@ -370,7 +370,7 @@ abstract class  WorldsMasterAuto extends LinearOpMode {
     public void turnAngleCCW(double angle) {
         while (opModeIsActive()) {
             double startingAngle = currentAngle();
-            while (getAngleDiff(startingAngle, currentAngle()) < angle - 4) {
+            while (getAngleDiff(startingAngle, currentAngle()) < angle - 4 && opModeIsActive()) {
                 double difference = ((angle - getAngleDiff(startingAngle, currentAngle())) / (angle * 2));
                 telemetry.addData("difference", difference);
                 telemetry.update();
@@ -456,14 +456,14 @@ abstract class  WorldsMasterAuto extends LinearOpMode {
                 if (direction == "CW") HorizontalColorServo.setPosition(HORIZONTAL_JEWELSERVO_CW);
                 else if (direction == "CCW")
                     HorizontalColorServo.setPosition(HORIZONTAL_JEWELSERVO_CCW);
-                delay(500);
+                sleep(500);
             }
             VerticalColorServo.setPosition(VERTICAL_JEWELSERVO_MID);
-            delay(150);
+            sleep(150);
             HorizontalColorServo.setPosition(HORIZONTAL_JEWELSERVO_MID);
-            delay(150);
+        sleep(150);
             VerticalColorServo.setPosition(VERTICAL_JEWELSERVO_UP);
-            delay(200);
+        sleep(200);
         }
 
     public void turnToColumnSequence(RelicRecoveryVuMark column) throws InterruptedException {
@@ -486,12 +486,12 @@ abstract class  WorldsMasterAuto extends LinearOpMode {
         // TODO from abby: 4/12/18 change the driving in this func to encoder:
         moveTicksBack(.4, 250);
         Servo1.setPosition(FLIP_OUT);
-        delay(500);
+        sleep(500);
         moveTicksBack(.4, 325);
-        delay(200);
+        sleep(200);
         moveTicksForward(.4, 325);
         Servo1.setPosition(FLIP_IN);
-        delay(100);
+        sleep(100);
         returntoCenterSequence(column);
     }
 }

@@ -15,14 +15,14 @@ public class Red2 extends WorldsMasterAuto {
         setBaseAngles("red2");
         waitForStart();
 
-        while (opModeIsActive() && !isStopRequested()) {
+        while (opModeIsActive()) {
             RelicRecoveryVuMark column = getPicto();
             jewelSequence("red");
-            delay(200);
+            sleep(200);
             moveTicksBack(.4,1200);
-            delay(950);
+            sleep(950);
             moveTicksRight(.6, 800);
-            delay(200);
+            sleep(200);
             turnToColumnSequence(column);
             placeGlyphSequence(column);
             break;

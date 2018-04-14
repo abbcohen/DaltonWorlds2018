@@ -20,6 +20,7 @@ public class Red1 extends WorldsMasterAuto {
             RelicRecoveryVuMark column = getPicto();
             jewelSequence("red");
             sleep(200);
+            //// TODO from abby: 4/14/18  test these numbers
             moveTicksBack(.4, 2000);
             sleep(200);
             turnToColumnSequence(column);

@@ -21,9 +21,9 @@ public class Blue2 extends WorldsMasterAuto {
             RelicRecoveryVuMark column = getPicto();
             jewelSequence("blue");
             sleep(200);
-            moveTicksForward(.4,1000);
+            moveTicksForward(.4,1200);
             sleep(950);
-            moveTicksRight(.6, 900);
+            moveTicksRight(.6, 800);
             sleep(200);
             turnToColumnSequence(column);
             placeGlyphSequence(column);

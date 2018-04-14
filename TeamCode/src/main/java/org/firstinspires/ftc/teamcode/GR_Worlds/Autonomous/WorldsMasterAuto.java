@@ -326,6 +326,17 @@ abstract class  WorldsMasterAuto extends LinearOpMode {
         return AngleUnit.DEGREES.fromUnit(angles.angleUnit, angles.firstAngle);
     }
 
+    public void setBaseAngles(String team) {
+        veryStartAngle = currentAngle();
+        setDefaultAngle(team);
+    }
+
+    public void setDefaultAngle(String team) {
+        if(team=="red1" || team=="blue1") facingCryptoAngle = currentAngle()+90; //IF CODE BREAKS try making this (currentAngle()+90)%360
+        else if(team=="blue2") facingCryptoAngle = currentAngle()+180; //IF CODE BREAKS try making this (currentAngle()+180)%360
+        else facingCryptoAngle = currentAngle();
+    }
+
     public void turnAngle(double rawAngle) throws InterruptedException {
         telemetry.addData("I have a turn now", "");
         telemetry.update();
@@ -399,17 +410,6 @@ abstract class  WorldsMasterAuto extends LinearOpMode {
         }
     }
 
-    public void setBaseAngles(String team) {
-        veryStartAngle = currentAngle();
-        setDefaultAngle(team);
-    }
-
-    public void setDefaultAngle(String team) {
-        if(team=="red1" || team=="blue1") facingCryptoAngle = currentAngle()+90;
-        else if(team=="blue2") facingCryptoAngle = currentAngle()+180;
-        else facingCryptoAngle = currentAngle();
-    }
-
     //*******************************SEQUENCE MOTION FUNCTIONS******************************************
     public void jewelSequence(String team) throws InterruptedException {
         String direction = "ERROR";
@@ -479,11 +479,11 @@ abstract class  WorldsMasterAuto extends LinearOpMode {
 
     public void returntoCenterSequence(RelicRecoveryVuMark column) throws InterruptedException {
         moveTicksForward(.4, 250);
+        sleep(100);
         turnAngle(currentAngle() - facingCryptoAngle);
     }
 
     public void placeGlyphSequence(RelicRecoveryVuMark column) throws InterruptedException {
-        // TODO from abby: 4/12/18 change the driving in this func to encoder:
         moveTicksBack(.4, 250);
         Servo1.setPosition(FLIP_OUT);
         sleep(500);

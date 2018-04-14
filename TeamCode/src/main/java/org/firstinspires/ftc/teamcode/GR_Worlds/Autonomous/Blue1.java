@@ -4,7 +4,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
 import org.firstinspires.ftc.robotcore.external.navigation.RelicRecoveryVuMark;
 
-@Autonomous(name = "NEW Blue 1", group = "Sensor")
+@Autonomous(name = "Blue 1", group = "Sensor")
 public class Blue1 extends WorldsMasterAuto {
 
     @Override
@@ -13,7 +13,7 @@ public class Blue1 extends WorldsMasterAuto {
         initGyro();
         waitForStart();
         initVuforia();
-        setStartAngle();
+        setBaseAngles("blue1");
 
         waitForStart();
 
@@ -27,7 +27,7 @@ public class Blue1 extends WorldsMasterAuto {
             // TODO from abby: 4/12/18 test these numbers:
             strafeRight(.4, 350);
             delay(200);
-            turnToColumnSequence(column, 90);
+            turnToColumnSequence(column);
             placeGlyphSequence(column);
             break;
         }

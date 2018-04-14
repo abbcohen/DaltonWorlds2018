@@ -1,10 +1,9 @@
 package org.firstinspires.ftc.teamcode.GR_Worlds.Autonomous;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-
 import org.firstinspires.ftc.robotcore.external.navigation.RelicRecoveryVuMark;
 
-@Autonomous(name = "NEW Red 1", group = "Sensor")
+@Autonomous(name = "Red 1", group = "Sensor")
 public class Red1 extends WorldsMasterAuto {
 
     @Override
@@ -13,19 +12,17 @@ public class Red1 extends WorldsMasterAuto {
         initGyro();
         waitForStart();
         initVuforia();
-        setStartAngle();
+        setBaseAngles("red1");
 
         waitForStart();
 
         while (opModeIsActive()) {
             RelicRecoveryVuMark column = getPicto();
-            //jewelSequence("red");
+            jewelSequence("red");
             delay(200);
-            // TODO from abby: 4/12/18 change to encoder driving:
             moveTicksBack(.4, 2000);
             delay(200);
-            // TODO from abby: 4/12/18 test this angle:
-           turnToColumnSequence(column, 90);
+            turnToColumnSequence(column);
             placeGlyphSequence(column);
             break;
         }

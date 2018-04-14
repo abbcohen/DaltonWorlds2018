@@ -48,9 +48,9 @@ abstract class  WorldsMasterAuto extends LinearOpMode {
     //other things
     ElapsedTime clock = new ElapsedTime();
     public double veryStartAngle;
-    static final double COLUMN_TURN_ANGLE = 15;
+    public double facingCryptoAngle;
+    static final double COLUMN_TURN_ANGLE = 14;
 
-    // TODO from abby: 4/12/18 test/change these servo positions, they are complete guesses
     //jewel servo positions
     static final double VERTICAL_JEWELSERVO_UP = .9;
     static final double VERTICAL_JEWELSERVO_MID = .6;
@@ -59,7 +59,8 @@ abstract class  WorldsMasterAuto extends LinearOpMode {
     static final double HORIZONTAL_JEWELSERVO_TURN = .1; //how much the color servo should turn in either direction
     static final double HORIZONTAL_JEWELSERVO_CCW = HORIZONTAL_JEWELSERVO_MID - HORIZONTAL_JEWELSERVO_TURN;
     static final double HORIZONTAL_JEWELSERVO_CW = HORIZONTAL_JEWELSERVO_MID + HORIZONTAL_JEWELSERVO_TURN;
-
+    static final double FLIP_IN = .18;
+    static final double FLIP_OUT= .5;
 
     //vuforia
     OpenGLMatrix lastLocation = null;
@@ -398,8 +399,15 @@ abstract class  WorldsMasterAuto extends LinearOpMode {
         }
     }
 
-    public void setStartAngle() {
+    public void setBaseAngles(String team) {
         veryStartAngle = currentAngle();
+        setDefaultAngle(team);
+    }
+
+    public void setDefaultAngle(String team) {
+        if(team=="red1" || team=="blue1") facingCryptoAngle = currentAngle()+90;
+        else if(team=="blue2") facingCryptoAngle = currentAngle()+180;
+        else facingCryptoAngle = currentAngle();
     }
 
     //*******************************SEQUENCE MOTION FUNCTIONS******************************************
@@ -458,8 +466,8 @@ abstract class  WorldsMasterAuto extends LinearOpMode {
             delay(200);
         }
 
-    public void turnToColumnSequence(RelicRecoveryVuMark column, int startOffset) throws InterruptedException {
-        turnAngle(currentAngle() - (veryStartAngle-startOffset));
+    public void turnToColumnSequence(RelicRecoveryVuMark column) throws InterruptedException {
+        turnAngle(currentAngle()-facingCryptoAngle);
         //TURN TO THE CORRECT COLUMN
         if (column == RelicRecoveryVuMark.CENTER) {
         } else if (column == RelicRecoveryVuMark.LEFT|| column == RelicRecoveryVuMark.UNKNOWN) {
@@ -469,27 +477,21 @@ abstract class  WorldsMasterAuto extends LinearOpMode {
         }
     }
 
-    public void returntoCenterSequence(RelicRecoveryVuMark column, int startOffset) throws InterruptedException {
-        if (column == RelicRecoveryVuMark.CENTER) {
-        } else if (column == RelicRecoveryVuMark.LEFT || column == RelicRecoveryVuMark.UNKNOWN) {
-            turnAngle(COLUMN_TURN_ANGLE);//fill w left value
-        } else turnAngle(-COLUMN_TURN_ANGLE);//fill w right value
+    public void returntoCenterSequence(RelicRecoveryVuMark column) throws InterruptedException {
+        moveTicksForward(.4, 250);
+        turnAngle(currentAngle() - facingCryptoAngle);
     }
 
     public void placeGlyphSequence(RelicRecoveryVuMark column) throws InterruptedException {
         // TODO from abby: 4/12/18 change the driving in this func to encoder:
-        Servo1.setPosition(0.5);
-        delay(250);
-        moveBackward(.4, 500);
+        moveTicksBack(.4, 250);
+        Servo1.setPosition(FLIP_OUT);
         delay(500);
-        moveForward(.4, 250);
+        moveTicksBack(.4, 325);
+        delay(200);
+        moveTicksForward(.4, 325);
+        Servo1.setPosition(FLIP_IN);
         delay(100);
-        Servo1.setPosition(0.3);
-        delay(100);
-        moveBackward(.4, 250);
-        returntoCenterSequence(column, 0);
-        delay(250);
-        moveForward(.4, 250);
-        delay(250);
+        returntoCenterSequence(column);
     }
 }

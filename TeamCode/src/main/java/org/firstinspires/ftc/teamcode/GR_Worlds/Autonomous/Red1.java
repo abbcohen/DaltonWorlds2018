@@ -20,11 +20,13 @@ public class Red1 extends WorldsMasterAuto {
             RelicRecoveryVuMark column = getPicto();
             jewelSequence("red");
             sleep(200);
-            //// TODO from abby: 4/14/18  test these numbers
+            // TODO from abby: 4/14/18  test these numbers
             moveTicksBack(.4, 2000);
             sleep(200);
-            turnToColumnSequence(column);
             placeGlyphSequence(column);
+            // TODO from abby: 4/15/18  test this function I wrote it at home and all the values are likely very wrong:
+            getMoreGlyphsStone1();
+            placeSecondGlyphSequence(column);
             break;
         }
     }

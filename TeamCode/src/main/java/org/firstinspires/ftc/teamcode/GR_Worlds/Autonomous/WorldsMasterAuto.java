@@ -279,6 +279,12 @@ abstract class  WorldsMasterAuto extends LinearOpMode {
         BackRight.setPower(-turn);
     }
 
+    public void nom(double power){ //positive value is right, negative value is left
+        NomRight.setPower(power);
+        NomLeft.setPower(power);
+    }
+
+
     //**********************************VUFORIA FUNCTIONS*******************************************
 
     public RelicRecoveryVuMark getPicto() {
@@ -477,13 +483,14 @@ abstract class  WorldsMasterAuto extends LinearOpMode {
         }
     }
 
-    public void returntoCenterSequence(RelicRecoveryVuMark column) throws InterruptedException {
+    public void returntoCenterSequence() throws InterruptedException {
         moveTicksForward(.4, 250);
         sleep(100);
         turnAngle(currentAngle() - facingCryptoAngle);
     }
 
     public void placeGlyphSequence(RelicRecoveryVuMark column) throws InterruptedException {
+        turnToColumnSequence(column);
         moveTicksBack(.4, 250);
         Servo1.setPosition(FLIP_OUT);
         sleep(500);
@@ -492,6 +499,111 @@ abstract class  WorldsMasterAuto extends LinearOpMode {
         moveTicksForward(.4, 325);
         Servo1.setPosition(FLIP_IN);
         sleep(100);
-        returntoCenterSequence(column);
+        returntoCenterSequence();
+    }
+
+    public void placeSecondGlyphSequence(RelicRecoveryVuMark column) throws InterruptedException {
+        RelicRecoveryVuMark newcolumn;
+        //Figure out what column is empty
+        if (column == RelicRecoveryVuMark.CENTER) {
+            newcolumn = RelicRecoveryVuMark.LEFT;  // if the first glyph was in the center, put the second in the left
+        } else if (column == RelicRecoveryVuMark.LEFT|| column == RelicRecoveryVuMark.UNKNOWN) {
+            newcolumn = RelicRecoveryVuMark.RIGHT; // if the first glyph was in the left, put the second in the right
+        } else{ // if the first glyph was in the right, put the second in the left
+            newcolumn = RelicRecoveryVuMark.LEFT;
+        }
+        telemetry.addLine("placing extra glyphs");
+        telemetry.update();
+        turnToColumnSequence(newcolumn);
+        moveTicksBack(.4, 250);
+        Servo1.setPosition(FLIP_OUT);
+        sleep(500);
+        moveTicksBack(.4, 325);
+        sleep(200);
+        moveTicksForward(.4, 325);
+        Servo1.setPosition(FLIP_IN);
+        sleep(100);
+        telemetry.addLine("glyphs placed, backing out");
+        telemetry.update();
+        returntoCenterSequence();
+    }
+
+    // TODO from abby: 4/15/18  test this function I wrote it at home and all the values are likely very wrong:
+    public void getMoreGlyphsStone1() throws InterruptedException{
+        nom(.95);
+        telemetry.addLine("the nom is on");
+        telemetry.update();
+        turnAngle(currentAngle()-facingCryptoAngle); //correct angle to face cryptobox
+        sleep(50);
+        moveTicksForward(.4, 2500); //drive straight into the glyph pile
+        telemetry.addLine("eating glyphs!");
+        telemetry.update();
+        sleep(600); //give it time to eat
+        telemetry.addLine("I'm done eating!");
+        telemetry.update();
+        moveTicksBack(.4, 500); //move out of the pile a tad
+        sleep(50);
+        turnAngle(currentAngle()-(facingCryptoAngle+10)); //turn 10 degrees to eat from a diff angle in case the first had no glyphs
+        sleep(50);
+        moveTicksForward(.4, 500); //drive back into the pile at an angle
+        telemetry.addLine("eating more glyphs (diff angle)!");
+        telemetry.update();
+        sleep(600);  //give it time to eat
+        telemetry.addLine("I'm done eating!");
+        telemetry.update();
+        moveTicksBack(.4, 500); //drive out of the pile at an angle to get back to the center
+        sleep(50);
+        turnAngle(currentAngle()-facingCryptoAngle); //correct angle to face cryptobox
+        telemetry.addLine("I'm facing the cryptobox!");
+        telemetry.update();
+        sleep(50);
+        moveTicksBack(.4, 2000); //drive back to the cryptobox
+        turnAngle(currentAngle() - facingCryptoAngle); //correct angle to face cryptobox
+        telemetry.addLine("I'm back at the cryptobox!");
+        telemetry.update();
+    }
+
+    // TODO from abby: 4/15/18  test this function I wrote it at home and all the values are likely very wrong:
+    public void getMoreGlyphsStone2(String team) throws InterruptedException{
+        nom(.95);
+        telemetry.addLine("my nom is on!");
+        telemetry.update();
+        turnAngle(currentAngle()-facingCryptoAngle); //correct angle to face cryptobox
+        sleep(50);
+        if(team == "blue" )  moveTicksLeft(.6, 800); //strafes toward center (a bit over halfway to it)
+        else if (team== "red") moveTicksRight(.6, 800); //strafes toward center (a bit over halfway to it)
+        telemetry.addLine("I'm close to the middle!");
+        telemetry.update();
+        sleep(50);
+        turnAngle((currentAngle()-(facingCryptoAngle))); //correct angle to face cryptobox
+        sleep(50);
+        moveTicksForward(.4,1200); //drive to the pile
+        telemetry.addLine("I'm at the pile!");
+        telemetry.update();
+        sleep(50);
+        if (team == "blue") turnAngle((currentAngle()-(facingCryptoAngle-45))); //turns 45 degrees toward the pile
+        else if (team == "red") turnAngle((currentAngle()-(facingCryptoAngle+45))); //turns 45 degrees toward the pile
+        telemetry.addLine("I'm facing the pile!");
+        telemetry.update();
+        sleep(50);
+        moveTicksForward(.4, 500); //drive into the pile
+        telemetry.addLine("I'm eating in the pile!");
+        telemetry.update();
+        sleep(600); //give it time to eat
+        telemetry.addLine("I'm done eating!");
+        telemetry.update();
+        moveTicksBack(.4, 500); //drive out of the pile
+        sleep(50);
+        turnAngle((currentAngle()-facingCryptoAngle)); //correct angle to face cryptobox wall
+        sleep(50);
+        moveTicksBack(.4,1200); //drive away from the pile
+        turnAngle((currentAngle()-facingCryptoAngle)); //correct angle to face cryptobox wall
+        telemetry.addLine("ready to strafe to the box");
+        telemetry.update();
+        sleep(50);
+        if(team == "blue" )  moveTicksRight(.6, 800); //strafes back to the center of the cryptobox
+        else if (team== "red") moveTicksLeft(.6, 800); //strafes back to the center of the cryptobox
+        telemetry.addLine("I'm lined up at the cryptobox!");
+        telemetry.update();
     }
 }

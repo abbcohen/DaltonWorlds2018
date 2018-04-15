@@ -24,11 +24,10 @@ public class Blue1 extends WorldsMasterAuto {
             // TODO from abby: 4/12/18 test these numbers:
             moveTicksForward(.4, 2000);
             sleep(200);
-            // TODO from abby: 4/12/18 test these numbers:
-            strafeRight(.4, 350);
-            sleep(200);
-            turnToColumnSequence(column);
             placeGlyphSequence(column);
+            getMoreGlyphsStone1();
+            // TODO from abby: 4/15/18  test this function I wrote it at home and all the values are likely very wrong:
+            placeSecondGlyphSequence(column);
             break;
         }
     }

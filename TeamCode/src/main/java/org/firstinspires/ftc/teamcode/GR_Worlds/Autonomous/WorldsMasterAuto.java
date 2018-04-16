@@ -48,9 +48,9 @@ abstract class  WorldsMasterAuto extends LinearOpMode {
     //other things
     ElapsedTime clock = new ElapsedTime();
     public double veryStartAngle;
-    static final double COLUMN_TURN_ANGLE = 15;
+    public double facingCryptoAngle;
+    static final double COLUMN_TURN_ANGLE = 14;
 
-    // TODO from abby: 4/12/18 test/change these servo positions, they are complete guesses
     //jewel servo positions
     static final double VERTICAL_JEWELSERVO_UP = .9;
     static final double VERTICAL_JEWELSERVO_MID = .6;
@@ -59,7 +59,8 @@ abstract class  WorldsMasterAuto extends LinearOpMode {
     static final double HORIZONTAL_JEWELSERVO_TURN = .1; //how much the color servo should turn in either direction
     static final double HORIZONTAL_JEWELSERVO_CCW = HORIZONTAL_JEWELSERVO_MID - HORIZONTAL_JEWELSERVO_TURN;
     static final double HORIZONTAL_JEWELSERVO_CW = HORIZONTAL_JEWELSERVO_MID + HORIZONTAL_JEWELSERVO_TURN;
-
+    static final double FLIP_IN = .18;
+    static final double FLIP_OUT= .5;
 
     //vuforia
     OpenGLMatrix lastLocation = null;
@@ -197,11 +198,11 @@ abstract class  WorldsMasterAuto extends LinearOpMode {
         telemetry.addData("relic", "activated");
     }
 
-    public void delay(int time) {
-        double startTime = runtime.milliseconds();
-        while (runtime.milliseconds() - startTime < time) {
-        }
-    }
+//    public void delay(int time) { DO NOT USE DELAY IT IS CODE CANCER
+//        double startTime = runtime.milliseconds();
+//        while (runtime.milliseconds() - startTime < time && opModeIsActive()) {
+//        }
+//    }
 
     //***************************************MOTION FUNCTIONS***************************************
     public void StopDriving(){
@@ -216,7 +217,7 @@ abstract class  WorldsMasterAuto extends LinearOpMode {
         FrontRight.setPower(power);
         BackLeft.setPower(power);
         BackRight.setPower(power);
-        delay(time);
+        sleep(time);
         FrontLeft.setPower(0);
         FrontRight.setPower(0);
         BackLeft.setPower(0);
@@ -228,7 +229,7 @@ abstract class  WorldsMasterAuto extends LinearOpMode {
         FrontRight.setPower(-power);
         BackLeft.setPower(-power);
         BackRight.setPower(-power);
-        delay(time);
+        sleep(time);
         FrontLeft.setPower(0);
         FrontRight.setPower(0);
         BackLeft.setPower(0);
@@ -240,7 +241,7 @@ abstract class  WorldsMasterAuto extends LinearOpMode {
         FrontRight.setPower(-power);
         BackLeft.setPower(-power);
         BackRight.setPower(power);
-        delay(time);
+        sleep(time);
         FrontLeft.setPower(0);
         FrontRight.setPower(0);
         BackLeft.setPower(0);
@@ -252,7 +253,7 @@ abstract class  WorldsMasterAuto extends LinearOpMode {
         FrontRight.setPower(power);
         BackLeft.setPower(power);
         BackRight.setPower(-power);
-        delay(time);
+        sleep(time);
         FrontLeft.setPower(0);
         FrontRight.setPower(0);
         BackLeft.setPower(0);
@@ -261,13 +262,13 @@ abstract class  WorldsMasterAuto extends LinearOpMode {
 
     public void turnRight(double power, int time) {
         turn(power);
-        delay(time);
+        sleep(time);
         StopDriving();
     }
 
     public void turnLeft(double power, int time) {
         turn(-power);
-        delay(time);
+        sleep(time);
         StopDriving();
     }
 
@@ -288,7 +289,7 @@ abstract class  WorldsMasterAuto extends LinearOpMode {
             return vuMark;
         }
         clock.reset();
-        while (clock.milliseconds() < 2000) {
+        while (clock.milliseconds() < 2000 && opModeIsActive()) {
             vuMark = RelicRecoveryVuMark.from(relicTemplate);
             if (vuMark != RelicRecoveryVuMark.UNKNOWN) {
                 telemetry.addData("Mark", vuMark);
@@ -308,7 +309,7 @@ abstract class  WorldsMasterAuto extends LinearOpMode {
         if (vuMark != RelicRecoveryVuMark.UNKNOWN) {
             return vuMark;
         } else {
-            while (startTime - getRuntime() < 2000) {
+            while (startTime - getRuntime() < 2000 && opModeIsActive()) {
                 vuMark = RelicRecoveryVuMark.from(relicTemplate);
                 if (vuMark != RelicRecoveryVuMark.UNKNOWN) {
                     return vuMark;
@@ -323,6 +324,17 @@ abstract class  WorldsMasterAuto extends LinearOpMode {
     double currentAngle() {
         Orientation angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
         return AngleUnit.DEGREES.fromUnit(angles.angleUnit, angles.firstAngle);
+    }
+
+    public void setBaseAngles(String team) {
+        veryStartAngle = currentAngle();
+        setDefaultAngle(team);
+    }
+
+    public void setDefaultAngle(String team) {
+        if(team=="red1" || team=="blue1") facingCryptoAngle = currentAngle()+90; //IF CODE BREAKS try making this (currentAngle()+90)%360
+        else if(team=="blue2") facingCryptoAngle = currentAngle()+180; //IF CODE BREAKS try making this (currentAngle()+180)%360
+        else facingCryptoAngle = currentAngle();
     }
 
     public void turnAngle(double rawAngle) throws InterruptedException {
@@ -369,7 +381,7 @@ abstract class  WorldsMasterAuto extends LinearOpMode {
     public void turnAngleCCW(double angle) {
         while (opModeIsActive()) {
             double startingAngle = currentAngle();
-            while (getAngleDiff(startingAngle, currentAngle()) < angle - 4) {
+            while (getAngleDiff(startingAngle, currentAngle()) < angle - 4 && opModeIsActive()) {
                 double difference = ((angle - getAngleDiff(startingAngle, currentAngle())) / (angle * 2));
                 telemetry.addData("difference", difference);
                 telemetry.update();
@@ -396,10 +408,6 @@ abstract class  WorldsMasterAuto extends LinearOpMode {
             angle2 -= 360;
             return Math.abs(angle1 - angle2);
         }
-    }
-
-    public void setStartAngle() {
-        veryStartAngle = currentAngle();
     }
 
     //*******************************SEQUENCE MOTION FUNCTIONS******************************************
@@ -448,18 +456,18 @@ abstract class  WorldsMasterAuto extends LinearOpMode {
                 if (direction == "CW") HorizontalColorServo.setPosition(HORIZONTAL_JEWELSERVO_CW);
                 else if (direction == "CCW")
                     HorizontalColorServo.setPosition(HORIZONTAL_JEWELSERVO_CCW);
-                delay(500);
+                sleep(500);
             }
             VerticalColorServo.setPosition(VERTICAL_JEWELSERVO_MID);
-            delay(150);
+            sleep(150);
             HorizontalColorServo.setPosition(HORIZONTAL_JEWELSERVO_MID);
-            delay(150);
+        sleep(150);
             VerticalColorServo.setPosition(VERTICAL_JEWELSERVO_UP);
-            delay(200);
+        sleep(200);
         }
 
-    public void turnToColumnSequence(RelicRecoveryVuMark column, int startOffset) throws InterruptedException {
-        turnAngle(currentAngle() - (veryStartAngle-startOffset));
+    public void turnToColumnSequence(RelicRecoveryVuMark column) throws InterruptedException {
+        turnAngle(currentAngle()-facingCryptoAngle);
         //TURN TO THE CORRECT COLUMN
         if (column == RelicRecoveryVuMark.CENTER) {
         } else if (column == RelicRecoveryVuMark.LEFT|| column == RelicRecoveryVuMark.UNKNOWN) {
@@ -469,27 +477,21 @@ abstract class  WorldsMasterAuto extends LinearOpMode {
         }
     }
 
-    public void returntoCenterSequence(RelicRecoveryVuMark column, int startOffset) throws InterruptedException {
-        if (column == RelicRecoveryVuMark.CENTER) {
-        } else if (column == RelicRecoveryVuMark.LEFT || column == RelicRecoveryVuMark.UNKNOWN) {
-            turnAngle(COLUMN_TURN_ANGLE);//fill w left value
-        } else turnAngle(-COLUMN_TURN_ANGLE);//fill w right value
+    public void returntoCenterSequence(RelicRecoveryVuMark column) throws InterruptedException {
+        moveTicksForward(.4, 250);
+        sleep(100);
+        turnAngle(currentAngle() - facingCryptoAngle);
     }
 
     public void placeGlyphSequence(RelicRecoveryVuMark column) throws InterruptedException {
-        // TODO from abby: 4/12/18 change the driving in this func to encoder:
-        Servo1.setPosition(0.5);
-        delay(250);
-        moveBackward(.4, 500);
-        delay(500);
-        moveForward(.4, 250);
-        delay(100);
-        Servo1.setPosition(0.3);
-        delay(100);
-        moveBackward(.4, 250);
-        returntoCenterSequence(column, 0);
-        delay(250);
-        moveForward(.4, 250);
-        delay(250);
+        moveTicksBack(.4, 250);
+        Servo1.setPosition(FLIP_OUT);
+        sleep(500);
+        moveTicksBack(.4, 325);
+        sleep(200);
+        moveTicksForward(.4, 325);
+        Servo1.setPosition(FLIP_IN);
+        sleep(100);
+        returntoCenterSequence(column);
     }
 }

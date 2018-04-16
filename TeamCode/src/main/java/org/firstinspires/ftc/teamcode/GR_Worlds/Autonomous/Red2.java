@@ -23,8 +23,10 @@ public class Red2 extends WorldsMasterAuto {
             sleep(950);
             moveTicksRight(.6, 800);
             sleep(200);
-            turnToColumnSequence(column);
             placeGlyphSequence(column);
+            // TODO from abby: 4/15/18  test this function I wrote it at home and all the values are likely very wrong:
+            getMoreGlyphsStone2("red");
+            placeSecondGlyphSequence(column);
             break;
         }
     }

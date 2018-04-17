@@ -143,6 +143,23 @@ abstract class  WorldsMasterAuto extends LinearOpMode {
         BackRight.setPower(0);
         BackLeft.setPower(0);
     }
+    public void moveUntilLine(double pow){
+//        boolean noLine = true;
+//        while(noLine) {
+//            telemetry.addLine("blue reading: "+colorSensorLine.blue());
+//            telemetry.addLine("red reading: "+colorSensorLine.red());
+//            telemetry.addLine("green reading: "+colorSensorLine.green());
+//
+////            if(colorSensorLine.){
+////            }
+////            FrontLeft.setPower(pow);
+////            FrontRight.setPower(pow);
+////            BackRight.setPower(pow);
+////            BackLeft.setPower(pow);
+//
+//        }
+    }
+
 
     public void initGyro() {
         BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
@@ -338,7 +355,8 @@ abstract class  WorldsMasterAuto extends LinearOpMode {
     }
 
     public void setDefaultAngle(String team) {
-        if(team=="red1" || team=="blue1") facingCryptoAngle = currentAngle()+90; //IF CODE BREAKS try making this (currentAngle()+90)%360
+        if(team=="red1") facingCryptoAngle = currentAngle()-90; //IF CODE BREAKS try making this (currentAngle()+90)%360
+        else if(team=="blue1") facingCryptoAngle = currentAngle()-90;
         else if(team=="blue2") facingCryptoAngle = currentAngle()+180; //IF CODE BREAKS try making this (currentAngle()+180)%360
         else facingCryptoAngle = currentAngle();
     }
@@ -474,6 +492,7 @@ abstract class  WorldsMasterAuto extends LinearOpMode {
 
     public void turnToColumnSequence(RelicRecoveryVuMark column) throws InterruptedException {
         turnAngle(currentAngle()-facingCryptoAngle);
+        telemetry.addData("turnAngle", currentAngle()-facingCryptoAngle);
         //TURN TO THE CORRECT COLUMN
         if (column == RelicRecoveryVuMark.CENTER) {
         } else if (column == RelicRecoveryVuMark.LEFT|| column == RelicRecoveryVuMark.UNKNOWN) {
@@ -494,7 +513,7 @@ abstract class  WorldsMasterAuto extends LinearOpMode {
         moveTicksBack(.4, 250);
         Servo1.setPosition(FLIP_OUT);
         sleep(500);
-        moveTicksBack(.4, 325);
+        moveBackward(.4, 300);
         sleep(200);
         moveTicksForward(.4, 325);
         Servo1.setPosition(FLIP_IN);
@@ -538,9 +557,12 @@ abstract class  WorldsMasterAuto extends LinearOpMode {
         moveTicksForward(.4, 2500); //drive straight into the glyph pile
         telemetry.addLine("eating glyphs!");
         telemetry.update();
-        sleep(600); //give it time to eat
+        sleep(300); //give it time to eat
         telemetry.addLine("I'm done eating!");
         telemetry.update();
+        nom(-.65);
+        sleep(100);
+        nom(.95);
         moveTicksBack(.4, 500); //move out of the pile a tad
         sleep(50);
         turnAngle(currentAngle()-(facingCryptoAngle+10)); //turn 10 degrees to eat from a diff angle in case the first had no glyphs

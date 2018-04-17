@@ -23,12 +23,12 @@ public class Blue2 extends WorldsMasterAuto {
             sleep(200);
             moveTicksForward(.4,1200);
             sleep(950);
-            moveTicksRight(.6, 800);
+            moveTicksRight(.6, 850);
             sleep(200);
             placeGlyphSequence(column);
             // TODO from abby: 4/15/18  test this function I wrote it at home and all the values are likely very wrong:
-            getMoreGlyphsStone2("blue");
-            placeSecondGlyphSequence(column);
+            //getMoreGlyphsStone2("blue");
+            //placeSecondGlyphSequence(column);
             break;
         }
     }

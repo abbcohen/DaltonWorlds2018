@@ -13,21 +13,21 @@ public class Blue1 extends WorldsMasterAuto {
         initGyro();
         waitForStart();
         initVuforia();
-        setStartAngle();
+        //setStartAngle();
 
         waitForStart();
 
         while (opModeIsActive()) {
             RelicRecoveryVuMark column = getPicto();
             //jewelSequence("blue");
-            delay(200);
+            //delay(200);
             // TODO from abby: 4/12/18 test these numbers:
             moveTicksForward(.4, 2000);
-            delay(200);
+            //delay(200);
             // TODO from abby: 4/12/18 test these numbers:
             strafeRight(.4, 350);
-            delay(200);
-            turnToColumnSequence(column, 90);
+            //delay(200);
+            //turnToColumnSequence(column, 90);
             placeGlyphSequence(column);
             break;
         }

@@ -4,7 +4,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
 import org.firstinspires.ftc.robotcore.external.navigation.RelicRecoveryVuMark;
 
-@Autonomous(name = "NEW Blue 1", group = "Sensor")
+@Autonomous(name = "Blue 1", group = "Sensor")
 public class Blue1 extends WorldsMasterAuto {
 
     @Override
@@ -25,11 +25,12 @@ public class Blue1 extends WorldsMasterAuto {
 //            moveTicksForward(.4, 1900); //this shit works
 
                                           //this shit may not work
-            moveTicksForward(.4, 800);
+            moveTicksForward(.4, 2000);
             sleep(200);
             //TURN TO THE CORRECT COLUMN
-            //turnToColumnSequence(column);
             placeGlyphSequence(column);
+            getMoreGlyphsStone1();
+            placeSecondGlyphSequence(column);
             break;
         }
     }

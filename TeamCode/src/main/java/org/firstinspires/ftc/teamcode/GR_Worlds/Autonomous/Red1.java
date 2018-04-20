@@ -19,6 +19,7 @@ public class Red1 extends WorldsMasterAuto {
         while (opModeIsActive()) {
             RelicRecoveryVuMark column = getPicto();
             jewelSequence("red");
+            elbowServo.setPosition(.45);
             sleep(200);
             // TODO from abby: 4/14/18  test these numbers
             moveTicksBack(.4, 2000);
@@ -26,6 +27,7 @@ public class Red1 extends WorldsMasterAuto {
             placeGlyphSequence(column);
             // TODO from abby: 4/15/18  test this function I wrote it at home and all the values are likely very wrong:
             getMoreGlyphsStone1();
+            //elbowServo.setPosition(.45);
             placeSecondGlyphSequence(column);
             break;
         }

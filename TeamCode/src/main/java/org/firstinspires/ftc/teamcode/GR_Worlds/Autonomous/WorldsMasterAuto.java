@@ -38,6 +38,9 @@ abstract class  WorldsMasterAuto extends LinearOpMode {
     public Servo Servo1 = null;
     public Servo VerticalColorServo = null;
     public Servo HorizontalColorServo = null;
+    public Servo elbowServo = null;
+    public Servo backPlate = null;
+    public Servo jewelHolder = null;
     double startTime = runtime.milliseconds();
 
     //imu
@@ -49,12 +52,12 @@ abstract class  WorldsMasterAuto extends LinearOpMode {
     ElapsedTime clock = new ElapsedTime();
     public double veryStartAngle;
     public double facingCryptoAngle;
-    static final double COLUMN_TURN_ANGLE = 14;
+    static final double COLUMN_TURN_ANGLE = 16;
 
     //jewel servo positions
     static final double VERTICAL_JEWELSERVO_UP = .9;
     static final double VERTICAL_JEWELSERVO_MID = .6;
-    static final double VERTICAL_JEWELSERVO_DOWN = .3;
+    static final double VERTICAL_JEWELSERVO_DOWN = .45;
     static final double HORIZONTAL_JEWELSERVO_MID = .73;
     static final double HORIZONTAL_JEWELSERVO_TURN = .1; //how much the color servo should turn in either direction
     static final double HORIZONTAL_JEWELSERVO_CCW = HORIZONTAL_JEWELSERVO_MID - HORIZONTAL_JEWELSERVO_TURN;
@@ -82,8 +85,11 @@ abstract class  WorldsMasterAuto extends LinearOpMode {
         colorSensor = hardwareMap.get(ColorSensor.class, "colorSensor");
         VerticalColorServo = hardwareMap.get(Servo.class, "colorServo");
         HorizontalColorServo = hardwareMap.get(Servo.class, "jewelTwister");
+        elbowServo = hardwareMap.get(Servo.class, "elbowServo");
+        backPlate = hardwareMap.get(Servo.class, "backPlate");
         NomLeft = hardwareMap.get(DcMotor.class, "NomLeft");
         NomRight = hardwareMap.get(DcMotor.class, "NomRight");
+        jewelHolder = hardwareMap.get(Servo.class, "jewelHolder");
 
         //WheelOne.setDirection(DcMotor.Direction.FORWARD);
         // Most robots need the motor on one side to be reversed to drive forward
@@ -437,6 +443,8 @@ abstract class  WorldsMasterAuto extends LinearOpMode {
     //*******************************SEQUENCE MOTION FUNCTIONS******************************************
     public void jewelSequence(String team) throws InterruptedException {
         String direction = "ERROR";
+        jewelHolder.setPosition(.8);
+        sleep(1000);
         VerticalColorServo.setPosition(VERTICAL_JEWELSERVO_DOWN);
         Boolean jewelBlue = null;
         Boolean jewel_has_been_spotted;
@@ -510,13 +518,20 @@ abstract class  WorldsMasterAuto extends LinearOpMode {
 
     public void placeGlyphSequence(RelicRecoveryVuMark column) throws InterruptedException {
         turnToColumnSequence(column);
-        moveTicksBack(.4, 250);
+        backPlate.setPosition(.9);
+        sleep(100);
+        moveTicksBack(.4, 100);
         Servo1.setPosition(FLIP_OUT);
+        moveTicksBack(.4, 150);
         sleep(500);
-        moveBackward(.4, 300);
+        moveBackward(.4, 200);
         sleep(200);
-        moveTicksForward(.4, 325);
+        turnAngle(-10);
+        moveTicksForward(.4, 50);
+        turnAngle(10);
+        moveTicksForward(.4, 275);
         Servo1.setPosition(FLIP_IN);
+        backPlate.setPosition(.3);
         sleep(100);
         returntoCenterSequence();
     }
@@ -534,13 +549,25 @@ abstract class  WorldsMasterAuto extends LinearOpMode {
         telemetry.addLine("placing extra glyphs");
         telemetry.update();
         turnToColumnSequence(newcolumn);
-        moveTicksBack(.4, 250);
+        sleep(100);
+        Servo1.setPosition(.4);
+        backPlate.setPosition(.9);
+        moveTicksBack(.4, 50);
+        Pulley.setPower(.6);
+        sleep(100);
+        Pulley.setPower(0);
+        sleep(100);
+        moveBackward(.4, 100);
+        sleep(100);
         Servo1.setPosition(FLIP_OUT);
-        sleep(500);
-        moveTicksBack(.4, 325);
+        backPlate.setPosition(.9);
         sleep(200);
         moveTicksForward(.4, 325);
         Servo1.setPosition(FLIP_IN);
+        backPlate.setPosition(.3);
+        Pulley.setPower(-.5);
+        sleep(100);
+        Pulley.setPower(0);
         sleep(100);
         telemetry.addLine("glyphs placed, backing out");
         telemetry.update();
@@ -549,20 +576,32 @@ abstract class  WorldsMasterAuto extends LinearOpMode {
 
     // TODO from abby: 4/15/18  test this function I wrote it at home and all the values are likely very wrong:
     public void getMoreGlyphsStone1() throws InterruptedException{
-        nom(.95);
+        nom(.9);
         telemetry.addLine("the nom is on");
         telemetry.update();
         turnAngle(currentAngle()-facingCryptoAngle); //correct angle to face cryptobox
-        sleep(50);
-        moveTicksForward(.4, 2500); //drive straight into the glyph pile
+        sleep(100);
+        moveTicksForward(.4, 1900); //drive straight into the glyph pile
         telemetry.addLine("eating glyphs!");
         telemetry.update();
-        sleep(300); //give it time to eat
+        sleep(100); //give it time to eat
+        nom(-.9);
+        sleep(70);
+        nom(.90);
+        sleep(50);
+        nom(.9);
+        sleep(100);
+        turnAngle(currentAngle()-(facingCryptoAngle+40)); //turn 40 degrees to eat from a diff angle in case the first had no glyphs
+        sleep(500);
+        moveTicksForward(.5, 200); //drive straight into the glyph pile
+        sleep(100);
+        moveTicksForward(-.5, 200); //drive straight into the glyph pile
+        sleep(100);
         telemetry.addLine("I'm done eating!");
         telemetry.update();
-        nom(-.65);
+        nom(-.9);
         sleep(100);
-        nom(.95);
+        nom(.9);
         moveTicksBack(.4, 500); //move out of the pile a tad
         sleep(50);
         turnAngle(currentAngle()-(facingCryptoAngle+10)); //turn 10 degrees to eat from a diff angle in case the first had no glyphs
@@ -574,11 +613,17 @@ abstract class  WorldsMasterAuto extends LinearOpMode {
         telemetry.addLine("I'm done eating!");
         telemetry.update();
         moveTicksBack(.4, 500); //drive out of the pile at an angle to get back to the center
+        nom(-.9);
+        sleep(100);
+        nom(.9);
         sleep(50);
+        Servo1.setPosition(.3);
         turnAngle(currentAngle()-facingCryptoAngle); //correct angle to face cryptobox
         telemetry.addLine("I'm facing the cryptobox!");
         telemetry.update();
+        //nom(-.65);
         sleep(50);
+        nom(0);
         moveTicksBack(.4, 2000); //drive back to the cryptobox
         turnAngle(currentAngle() - facingCryptoAngle); //correct angle to face cryptobox
         telemetry.addLine("I'm back at the cryptobox!");

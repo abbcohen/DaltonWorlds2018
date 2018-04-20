@@ -26,6 +26,7 @@ public class Ava extends OpMode {
     //private Servo ServoRelicRelease = null;
     private Servo handServo = null;
     private Servo elbowServo = null;
+    private Servo jewelHolder = null;
     //private DcMotor ThiccBoiRetriever= null;
     private Servo colorServo = null;
     double startTime = runtime.milliseconds();
@@ -55,6 +56,7 @@ public class Ava extends OpMode {
         handServo = hardwareMap.get(Servo.class, "handServo");
         elbowServo = hardwareMap.get(Servo.class, "elbowServo");
         colorServo = hardwareMap.get(Servo.class, "colorServo");
+        jewelHolder = hardwareMap.get(Servo.class, "jewelHolder");
 
 
         // Most robots need the motor on one side to be reversed to drive forward

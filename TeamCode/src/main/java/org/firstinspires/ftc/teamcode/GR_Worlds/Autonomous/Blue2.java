@@ -17,18 +17,17 @@ public class Blue2 extends WorldsMasterAuto {
 
         waitForStart();
 
-        while (opModeIsActive()) {
+        while (opModeIsActive() && !isStopRequested()) {
             RelicRecoveryVuMark column = getPicto();
             jewelSequence("blue");
             sleep(200);
-            moveTicksForward(.4,1100);
+            moveTicksForward(.8,1200);
             sleep(950);
-            moveTicksRight(.6, 800);
+            moveTicksRight(.8, 750);
             sleep(200);
-            placeGlyphSequence(column);
-            // TODO from abby: 4/15/18  test this function I wrote it at home and all the values are likely very wrong:
-            //getMoreGlyphsStone2("blue");
-            //placeSecondGlyphSequence(column);
+            placeGlyphSequence(column, false);
+//            getMoreGlyphsStone2("blue");
+//            placeSecondGlyphSequence(column, false);
             break;
         }
     }

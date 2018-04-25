@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.ignoreThis;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -8,6 +9,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.robotcore.external.navigation.RelicRecoveryVuMark;
 
+@Disabled
 @Autonomous(name = "RedCorner")
 public class RedNotCorner extends AutoBase {
     RelicRecoveryVuMark column = RelicRecoveryVuMark.UNKNOWN;

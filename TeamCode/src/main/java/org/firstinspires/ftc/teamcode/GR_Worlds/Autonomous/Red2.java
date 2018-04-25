@@ -15,19 +15,34 @@ public class Red2 extends WorldsMasterAuto {
         setBaseAngles("red2");
         waitForStart();
 
-        while (opModeIsActive()) {
+        while (opModeIsActive() && !isStopRequested()) {
             RelicRecoveryVuMark column = getPicto();
             jewelSequence("red");
             sleep(200);
-            moveTicksBack(.4,1500);
+            moveTicksBack(.4,1300);
             sleep(950);
-            moveTicksRight(.6, 800);
+            moveTicksRight(.6, 1000);
             sleep(200);
-            placeGlyphSequence(column);
-            // TODO from abby: 4/15/18  test this function I wrote it at home and all the values are likely very wrong:
-            //getMoreGlyphsStone2("red");
-            //r5placeSecondGlyphSequence(column);
+            placeGlyphSequence(column, false);
+//            // TODO from abby: 4/15/18  test this function I wrote it at home and all the values are likely very wrong:
+//            getMoreGlyphsStone2("red");
+//            placeSecondGlyphSequence(column, false);
             break;
         }
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

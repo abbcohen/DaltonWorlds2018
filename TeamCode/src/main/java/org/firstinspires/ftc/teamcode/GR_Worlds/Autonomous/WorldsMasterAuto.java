@@ -58,12 +58,12 @@ abstract class  WorldsMasterAuto extends LinearOpMode {
     static final double VERTICAL_JEWELSERVO_UP = .9;
     static final double VERTICAL_JEWELSERVO_MID = .6;
     static final double VERTICAL_JEWELSERVO_DOWN = .45;
-    static final double HORIZONTAL_JEWELSERVO_MID = .73;
+    static final double HORIZONTAL_JEWELSERVO_MID = .78; //was .73
     static final double HORIZONTAL_JEWELSERVO_TURN = .1; //how much the color servo should turn in either direction
     static final double HORIZONTAL_JEWELSERVO_CCW = HORIZONTAL_JEWELSERVO_MID - HORIZONTAL_JEWELSERVO_TURN;
     static final double HORIZONTAL_JEWELSERVO_CW = HORIZONTAL_JEWELSERVO_MID + HORIZONTAL_JEWELSERVO_TURN;
     static final double FLIP_IN = .18;
-    static final double FLIP_OUT= .5;
+    static final double FLIP_OUT = .5;
 
     //vuforia
     OpenGLMatrix lastLocation = null;
@@ -109,6 +109,7 @@ abstract class  WorldsMasterAuto extends LinearOpMode {
 
         VerticalColorServo.setPosition(VERTICAL_JEWELSERVO_UP);
         HorizontalColorServo.setPosition(HORIZONTAL_JEWELSERVO_MID);
+        jewelHolder.setPosition(.2);
         pos = getTicks();
     }
 
@@ -119,15 +120,19 @@ abstract class  WorldsMasterAuto extends LinearOpMode {
     public void resetTicks() {
         pos = FrontRight.getCurrentPosition();
     }
+
     public void moveTicksForward(double pow, double ticks) {
         moveTicks(pow, pow, pow, pow, ticks);
     }
+
     public void moveTicksBack(double pow, double ticks) {
         moveTicks(-pow, -pow, -pow, -pow, -ticks);
     }
+
     public void moveTicksLeft(double pow, double ticks) {
         moveTicks(-pow, pow, -pow, pow, ticks);
     }
+
     public void moveTicksRight(double pow, double ticks) {
         moveTicks(pow, -pow, pow, -pow, -ticks);
     }
@@ -149,7 +154,8 @@ abstract class  WorldsMasterAuto extends LinearOpMode {
         BackRight.setPower(0);
         BackLeft.setPower(0);
     }
-    public void moveUntilLine(double pow){
+
+    public void moveUntilLine(double pow) {
 //        boolean noLine = true;
 //        while(noLine) {
 //            telemetry.addLine("blue reading: "+colorSensorLine.blue());
@@ -228,7 +234,7 @@ abstract class  WorldsMasterAuto extends LinearOpMode {
 //    }
 
     //***************************************MOTION FUNCTIONS***************************************
-    public void StopDriving(){
+    public void StopDriving() {
         FrontLeft.setPower(0);
         FrontRight.setPower(0);
         BackLeft.setPower(0);
@@ -295,14 +301,14 @@ abstract class  WorldsMasterAuto extends LinearOpMode {
         StopDriving();
     }
 
-    public void turn(double turn){ //positive value is right, negative value is left
+    public void turn(double turn) { //positive value is right, negative value is left
         FrontLeft.setPower(turn);
         BackLeft.setPower(turn);
         FrontRight.setPower(-turn);
         BackRight.setPower(-turn);
     }
 
-    public void nom(double power){ //positive value is right, negative value is left
+    public void nom(double power) { //positive value is right, negative value is left
         NomRight.setPower(power);
         NomLeft.setPower(power);
     }
@@ -318,7 +324,7 @@ abstract class  WorldsMasterAuto extends LinearOpMode {
             return vuMark;
         }
         clock.reset();
-        while (clock.milliseconds() < 2000 && opModeIsActive()) {
+        while (clock.milliseconds() < 1500 && opModeIsActive() && !isStopRequested()) {
             vuMark = RelicRecoveryVuMark.from(relicTemplate);
             if (vuMark != RelicRecoveryVuMark.UNKNOWN) {
                 telemetry.addData("Mark", vuMark);
@@ -338,7 +344,7 @@ abstract class  WorldsMasterAuto extends LinearOpMode {
         if (vuMark != RelicRecoveryVuMark.UNKNOWN) {
             return vuMark;
         } else {
-            while (startTime - getRuntime() < 2000 && opModeIsActive()) {
+            while (startTime - getRuntime() < 2000 && opModeIsActive() && !isStopRequested()) {
                 vuMark = RelicRecoveryVuMark.from(relicTemplate);
                 if (vuMark != RelicRecoveryVuMark.UNKNOWN) {
                     return vuMark;
@@ -361,9 +367,11 @@ abstract class  WorldsMasterAuto extends LinearOpMode {
     }
 
     public void setDefaultAngle(String team) {
-        if(team=="red1") facingCryptoAngle = currentAngle()-90; //IF CODE BREAKS try making this (currentAngle()+90)%360
-        else if(team=="blue1") facingCryptoAngle = currentAngle()-90;
-        else if(team=="blue2") facingCryptoAngle = currentAngle()+180; //IF CODE BREAKS try making this (currentAngle()+180)%360
+        if (team == "red1")
+            facingCryptoAngle = currentAngle() - 90; //IF CODE BREAKS try making this (currentAngle()+90)%360
+        else if (team == "blue1") facingCryptoAngle = currentAngle() - 90;
+        else if (team == "blue2")
+            facingCryptoAngle = currentAngle() + 180; //IF CODE BREAKS try making this (currentAngle()+180)%360
         else facingCryptoAngle = currentAngle();
     }
 
@@ -383,7 +391,7 @@ abstract class  WorldsMasterAuto extends LinearOpMode {
         else {
             double startingAngle = currentAngle();
             double goal = (currentAngle() + angle);
-            while ((getAngleDiff(startingAngle, currentAngle()) < angle - 4) && opModeIsActive()) {
+            while ((getAngleDiff(startingAngle, currentAngle()) < angle - 4) && opModeIsActive() && !isStopRequested()) {
                 if (getAngleDiff(currentAngle(), goal) > 90) turn(-.5);
                 else {
                     turnAngleCCW(90);
@@ -396,7 +404,7 @@ abstract class  WorldsMasterAuto extends LinearOpMode {
 
     public void turnAngleCW(double angle) {
         double startingAngle = currentAngle();
-        while ((getAngleDiff(startingAngle, currentAngle()) < angle - 4) && opModeIsActive()) {
+        while ((getAngleDiff(startingAngle, currentAngle()) < angle - 4) && opModeIsActive() && !isStopRequested()) {
             double difference = ((angle - getAngleDiff(startingAngle, currentAngle())) / (angle * 2));
             telemetry.addData("difference", difference);
             telemetry.update();
@@ -409,9 +417,9 @@ abstract class  WorldsMasterAuto extends LinearOpMode {
     }
 
     public void turnAngleCCW(double angle) {
-        while (opModeIsActive()) {
+        while (opModeIsActive() && !isStopRequested()) {
             double startingAngle = currentAngle();
-            while (getAngleDiff(startingAngle, currentAngle()) < angle - 4 && opModeIsActive()) {
+            while (getAngleDiff(startingAngle, currentAngle()) < angle - 4 && opModeIsActive() && !isStopRequested()) {
                 double difference = ((angle - getAngleDiff(startingAngle, currentAngle())) / (angle * 2));
                 telemetry.addData("difference", difference);
                 telemetry.update();
@@ -426,6 +434,7 @@ abstract class  WorldsMasterAuto extends LinearOpMode {
             StopDriving();
             break;
         }
+        return;
     }
 
     public double getAngleDiff(double angle1, double angle2) {
@@ -442,18 +451,23 @@ abstract class  WorldsMasterAuto extends LinearOpMode {
 
     //*******************************SEQUENCE MOTION FUNCTIONS******************************************
     public void jewelSequence(String team) throws InterruptedException {
-        String direction = "ERROR";
-        jewelHolder.setPosition(.8);
-        sleep(1000);
-        VerticalColorServo.setPosition(VERTICAL_JEWELSERVO_DOWN);
-        Boolean jewelBlue = null;
-        Boolean jewel_has_been_spotted;
+        while (opModeIsActive() && !isStopRequested()) {
+            String direction = "ERROR";
+            jewelHolder.setPosition(.8);
+            sleep(500);
+            VerticalColorServo.setPosition(VERTICAL_JEWELSERVO_DOWN);
+            Boolean jewelBlue = null;
+            Boolean jewel_has_been_spotted;
             //read color
             int red = 0;
             int blue = 0;
-            for (int i = 0; i < 40; i++) {
-                if (colorSensor.red() > colorSensor.blue() && colorSensor.red() > .15) red++;
-                if (colorSensor.red() < colorSensor.blue() && colorSensor.blue() > .15) blue++;
+            clock.reset();
+            while (clock.milliseconds() < 1500 && opModeIsActive() && !isStopRequested()) {
+                for (int i = 0; i < 40; i++) {
+                    if (colorSensor.red() > colorSensor.blue() && colorSensor.red() > .15) red++;
+                    if (colorSensor.red() < colorSensor.blue() && colorSensor.blue() > .15) blue++;
+                }
+                break;
             }
             telemetry.addLine("read color");
             telemetry.update();
@@ -488,189 +502,205 @@ abstract class  WorldsMasterAuto extends LinearOpMode {
                 if (direction == "CW") HorizontalColorServo.setPosition(HORIZONTAL_JEWELSERVO_CW);
                 else if (direction == "CCW")
                     HorizontalColorServo.setPosition(HORIZONTAL_JEWELSERVO_CCW);
-                sleep(500);
+                sleep(400);
             }
             VerticalColorServo.setPosition(VERTICAL_JEWELSERVO_MID);
-            sleep(150);
+            sleep(100);
             HorizontalColorServo.setPosition(HORIZONTAL_JEWELSERVO_MID);
-        sleep(150);
+            sleep(100);
             VerticalColorServo.setPosition(VERTICAL_JEWELSERVO_UP);
-        sleep(200);
+            sleep(200);
+            break;
         }
+        return;
+    }
 
-    public void turnToColumnSequence(RelicRecoveryVuMark column) throws InterruptedException {
-        turnAngle(currentAngle()-facingCryptoAngle);
-        telemetry.addData("turnAngle", currentAngle()-facingCryptoAngle);
-        //TURN TO THE CORRECT COLUMN
-        if (column == RelicRecoveryVuMark.CENTER) {
-        } else if (column == RelicRecoveryVuMark.LEFT|| column == RelicRecoveryVuMark.UNKNOWN) {
-            turnAngle(-COLUMN_TURN_ANGLE);//fill w left value
-        } else{
-            turnAngle(COLUMN_TURN_ANGLE);//fill w right value
+    public void turnToColumnSequence(RelicRecoveryVuMark column, boolean red1) throws InterruptedException {
+        while (opModeIsActive() && !isStopRequested()) {
+            turnAngle(currentAngle() - facingCryptoAngle);
+            telemetry.addData("turnAngle", currentAngle() - facingCryptoAngle);
+            //TURN TO THE CORRECT COLUMN
+            if (column == RelicRecoveryVuMark.CENTER) {
+            } else if (column == RelicRecoveryVuMark.LEFT || column == RelicRecoveryVuMark.UNKNOWN) {
+                turnAngle(-COLUMN_TURN_ANGLE);//fill w left value
+            } else {
+                if (red1) turnAngle(COLUMN_TURN_ANGLE+2);
+                else turnAngle(COLUMN_TURN_ANGLE);//fill w right value
+            }
+            break;
         }
+        return;
     }
 
-    public void returntoCenterSequence() throws InterruptedException {
-        moveTicksForward(.4, 250);
-        sleep(100);
-        turnAngle(currentAngle() - facingCryptoAngle);
-    }
-
-    public void placeGlyphSequence(RelicRecoveryVuMark column) throws InterruptedException {
-        turnToColumnSequence(column);
-        backPlate.setPosition(.9);
-        sleep(100);
-        moveTicksBack(.4, 100);
-        Servo1.setPosition(FLIP_OUT);
-        moveTicksBack(.4, 150);
-        sleep(500);
-        moveBackward(.4, 200);
-        sleep(200);
-        turnAngle(-10);
-        moveTicksForward(.4, 50);
-        turnAngle(10);
-        moveTicksForward(.4, 275);
-        Servo1.setPosition(FLIP_IN);
-        backPlate.setPosition(.3);
-        sleep(100);
-        returntoCenterSequence();
-    }
-
-    public void placeSecondGlyphSequence(RelicRecoveryVuMark column) throws InterruptedException {
-        RelicRecoveryVuMark newcolumn;
-        //Figure out what column is empty
-        if (column == RelicRecoveryVuMark.CENTER) {
-            newcolumn = RelicRecoveryVuMark.LEFT;  // if the first glyph was in the center, put the second in the left
-        } else if (column == RelicRecoveryVuMark.LEFT|| column == RelicRecoveryVuMark.UNKNOWN) {
-            newcolumn = RelicRecoveryVuMark.RIGHT; // if the first glyph was in the left, put the second in the right
-        } else{ // if the first glyph was in the right, put the second in the left
-            newcolumn = RelicRecoveryVuMark.LEFT;
+    public void returntoCenterSequence(boolean end) throws InterruptedException {
+        while (opModeIsActive() && !isStopRequested()) {
+            moveTicksForward(.4, 250);
+            sleep(100);
+            turnAngle(currentAngle() - facingCryptoAngle);
+            //if (end) moveTicksBack(.4, 150);
+            break;
         }
-        telemetry.addLine("placing extra glyphs");
-        telemetry.update();
-        turnToColumnSequence(newcolumn);
-        sleep(100);
-        Servo1.setPosition(.4);
-        backPlate.setPosition(.9);
-        moveTicksBack(.4, 50);
-        Pulley.setPower(.6);
-        sleep(100);
-        Pulley.setPower(0);
-        sleep(100);
-        moveBackward(.4, 100);
-        sleep(100);
-        Servo1.setPosition(FLIP_OUT);
-        backPlate.setPosition(.9);
-        sleep(200);
-        moveTicksForward(.4, 325);
-        Servo1.setPosition(FLIP_IN);
-        backPlate.setPosition(.3);
-        Pulley.setPower(-.5);
-        sleep(100);
-        Pulley.setPower(0);
-        sleep(100);
-        telemetry.addLine("glyphs placed, backing out");
-        telemetry.update();
-        returntoCenterSequence();
+        return;
     }
 
-    // TODO from abby: 4/15/18  test this function I wrote it at home and all the values are likely very wrong:
-    public void getMoreGlyphsStone1() throws InterruptedException{
-        nom(.9);
-        telemetry.addLine("the nom is on");
-        telemetry.update();
-        turnAngle(currentAngle()-facingCryptoAngle); //correct angle to face cryptobox
-        sleep(100);
-        moveTicksForward(.4, 1900); //drive straight into the glyph pile
-        telemetry.addLine("eating glyphs!");
-        telemetry.update();
-        sleep(100); //give it time to eat
-        nom(-.9);
-        sleep(70);
-        nom(.90);
-        sleep(50);
-        nom(.9);
-        sleep(100);
-        turnAngle(currentAngle()-(facingCryptoAngle+40)); //turn 40 degrees to eat from a diff angle in case the first had no glyphs
-        sleep(500);
-        moveTicksForward(.5, 200); //drive straight into the glyph pile
-        sleep(100);
-        moveTicksForward(-.5, 200); //drive straight into the glyph pile
-        sleep(100);
-        telemetry.addLine("I'm done eating!");
-        telemetry.update();
-        nom(-.9);
-        sleep(100);
-        nom(.9);
-        moveTicksBack(.4, 500); //move out of the pile a tad
-        sleep(50);
-        turnAngle(currentAngle()-(facingCryptoAngle+10)); //turn 10 degrees to eat from a diff angle in case the first had no glyphs
-        sleep(50);
-        moveTicksForward(.4, 500); //drive back into the pile at an angle
-        telemetry.addLine("eating more glyphs (diff angle)!");
-        telemetry.update();
-        sleep(600);  //give it time to eat
-        telemetry.addLine("I'm done eating!");
-        telemetry.update();
-        moveTicksBack(.4, 500); //drive out of the pile at an angle to get back to the center
-        nom(-.9);
-        sleep(100);
-        nom(.9);
-        sleep(50);
-        Servo1.setPosition(.3);
-        turnAngle(currentAngle()-facingCryptoAngle); //correct angle to face cryptobox
-        telemetry.addLine("I'm facing the cryptobox!");
-        telemetry.update();
-        //nom(-.65);
-        sleep(50);
-        nom(0);
-        moveTicksBack(.4, 2000); //drive back to the cryptobox
-        turnAngle(currentAngle() - facingCryptoAngle); //correct angle to face cryptobox
-        telemetry.addLine("I'm back at the cryptobox!");
-        telemetry.update();
+    public void placeGlyphSequence(RelicRecoveryVuMark column, boolean red1) throws InterruptedException {
+        while (opModeIsActive() && !isStopRequested()) {
+            turnToColumnSequence(column, red1);
+            backPlate.setPosition(.9);
+            sleep(100);
+            moveTicksBack(.4, 100);
+            Servo1.setPosition(FLIP_OUT);
+            moveTicksBack(.4, 150);
+            sleep(500);
+            moveBackward(.4, 200);
+            sleep(200);
+            turnAngle(-10);
+            moveTicksForward(.4, 50);
+            turnAngle(10);
+            moveTicksForward(.4, 275);
+            Servo1.setPosition(FLIP_IN);
+            backPlate.setPosition(.3);
+            sleep(100);
+            returntoCenterSequence(false);
+            break;
+        }
+        return;
     }
 
-    // TODO from abby: 4/15/18  test this function I wrote it at home and all the values are likely very wrong:
-    public void getMoreGlyphsStone2(String team) throws InterruptedException{
-        nom(.95);
-        telemetry.addLine("my nom is on!");
-        telemetry.update();
-        turnAngle(currentAngle()-facingCryptoAngle); //correct angle to face cryptobox
-        sleep(50);
-        if(team == "blue" )  moveTicksLeft(.6, 800); //strafes toward center (a bit over halfway to it)
-        else if (team== "red") moveTicksRight(.6, 800); //strafes toward center (a bit over halfway to it)
-        telemetry.addLine("I'm close to the middle!");
-        telemetry.update();
-        sleep(50);
-        turnAngle((currentAngle()-(facingCryptoAngle))); //correct angle to face cryptobox
-        sleep(50);
-        moveTicksForward(.4,1200); //drive to the pile
-        telemetry.addLine("I'm at the pile!");
-        telemetry.update();
-        sleep(50);
-        if (team == "blue") turnAngle((currentAngle()-(facingCryptoAngle-45))); //turns 45 degrees toward the pile
-        else if (team == "red") turnAngle((currentAngle()-(facingCryptoAngle+45))); //turns 45 degrees toward the pile
-        telemetry.addLine("I'm facing the pile!");
-        telemetry.update();
-        sleep(50);
-        moveTicksForward(.4, 500); //drive into the pile
-        telemetry.addLine("I'm eating in the pile!");
-        telemetry.update();
-        sleep(600); //give it time to eat
-        telemetry.addLine("I'm done eating!");
-        telemetry.update();
-        moveTicksBack(.4, 500); //drive out of the pile
-        sleep(50);
-        turnAngle((currentAngle()-facingCryptoAngle)); //correct angle to face cryptobox wall
-        sleep(50);
-        moveTicksBack(.4,1200); //drive away from the pile
-        turnAngle((currentAngle()-facingCryptoAngle)); //correct angle to face cryptobox wall
-        telemetry.addLine("ready to strafe to the box");
-        telemetry.update();
-        sleep(50);
-        if(team == "blue" )  moveTicksRight(.6, 800); //strafes back to the center of the cryptobox
-        else if (team== "red") moveTicksLeft(.6, 800); //strafes back to the center of the cryptobox
-        telemetry.addLine("I'm lined up at the cryptobox!");
-        telemetry.update();
+    public void placeSecondGlyphSequence(RelicRecoveryVuMark column, boolean red1) throws InterruptedException {
+        while (opModeIsActive() && !isStopRequested()) {
+            RelicRecoveryVuMark newcolumn;
+            //Figure out what column is empty
+            if (column == RelicRecoveryVuMark.CENTER) {
+                newcolumn = RelicRecoveryVuMark.LEFT;  // if the first glyph was in the center, put the second in the left
+            } else if (column == RelicRecoveryVuMark.LEFT || column == RelicRecoveryVuMark.UNKNOWN) {
+                newcolumn = RelicRecoveryVuMark.RIGHT; // if the first glyph was in the left, put the second in the right
+            } else { // if the first glyph was in the right, put the second in the left
+                newcolumn = RelicRecoveryVuMark.LEFT;
+            }
+            telemetry.addLine("placing extra glyphs");
+            telemetry.update();
+            turnToColumnSequence(newcolumn, false);
+            elbowServo.setPosition(.5);
+            sleep(100);
+            Servo1.setPosition(.4);
+            backPlate.setPosition(.9);
+            moveTicksBack(.4, 50);
+            Pulley.setPower(.6);
+            sleep(100);
+            Pulley.setPower(0);
+            sleep(100);
+            moveTicksBack(.5, 325);
+            sleep(350);
+            Servo1.setPosition(FLIP_OUT);
+            moveBackward(.5, 400);
+            backPlate.setPosition(.9);
+            sleep(350);
+            moveTicksForward(.5, 250);
+            moveTicksBack(.5, 250);
+            moveTicksForward(.5, 250);
+            if(red1) moveTicksForward(.5, 250);
+            Servo1.setPosition(FLIP_IN);
+            backPlate.setPosition(.3);
+            Pulley.setPower(-.5);
+            sleep(100);
+            Pulley.setPower(0);
+            sleep(100);
+            telemetry.addLine("glyphs placed, backing out");
+            telemetry.update();
+            returntoCenterSequence(true);
+            break;
+        }
+        return;
+    }
+
+    public void getMoreGlyphsStone1() throws InterruptedException {
+        while (opModeIsActive() && !isStopRequested()) {
+            nom(.9);
+            telemetry.addLine("the nom is on");
+            telemetry.update();
+            turnAngle(currentAngle() - facingCryptoAngle); //correct angle to face cryptobox
+            sleep(100);
+            moveTicksForward(.4, 1900); //drive straight into the glyph pile
+            telemetry.addLine("eating glyphs!");
+            telemetry.update();
+            sleep(200); //give it time to eat
+//        turnAngle(currentAngle()-(facingCryptoAngle+40)); //turn 40 degrees to eat from a diff angle in case the first had no glyphs
+//        sleep(500);
+            turnAngle(currentAngle() - facingCryptoAngle); //correct angle to face cryptobox
+            moveTicksBack(.5, 300); //drive straight into  the glyph pile
+            turnAngle(currentAngle() - facingCryptoAngle); //correct angle to face cryptobox
+            sleep(200);
+            moveTicksForward(.5, 300); //drive straight out of the glyph pile
+            turnAngle(currentAngle() - facingCryptoAngle); //correct angle to face cryptobox
+//        sleep(100);
+            telemetry.addLine("I'm done eating!");
+            telemetry.update();
+            sleep(100);
+            turnAngle(currentAngle() - facingCryptoAngle); //correct angle to face cryptobox
+            telemetry.addLine("I'm facing the cryptobox!");
+            telemetry.update();
+            //nom(-.65);
+            sleep(50);
+            moveTicksBack(.4, 2000); //drive back to the cryptobox
+            turnAngle(currentAngle() - facingCryptoAngle); //correct angle to face cryptobox
+            telemetry.addLine("I'm back at the cryptobox!");
+            telemetry.update();
+            break;
+        }
+        return;
+    }
+
+    public void getMoreGlyphsStone2(String team) throws InterruptedException {
+        while (opModeIsActive() && !isStopRequested()) {
+            nom(.95);
+            telemetry.addLine("my nom is on!");
+            telemetry.update();
+            turnAngle(currentAngle() - facingCryptoAngle); //correct angle to face cryptobox
+            sleep(50);
+            if (team == "blue")
+                moveTicksLeft(.7, 800); //strafes toward center (a bit over halfway to it)
+            else if (team == "red")
+                moveTicksRight(.7, 800); //strafes toward center (a bit over halfway to it)
+            telemetry.addLine("I'm close to the middle!");
+            telemetry.update();
+            sleep(50);
+            turnAngle((currentAngle() - (facingCryptoAngle))); //correct angle to face cryptobox
+            sleep(50);
+            moveTicksForward(.7, 1100); //drive to the pile
+            telemetry.addLine("I'm at the pile!");
+            telemetry.update();
+            sleep(50);
+            if (team == "red")
+                turnAngle((currentAngle() - (facingCryptoAngle - 45))); //turns 45 degrees toward the pile
+            else if (team == "blue")
+                turnAngle((currentAngle() - (facingCryptoAngle + 45))); //turns 45 degrees toward the pile
+            telemetry.addLine("I'm facing the pile!");
+            telemetry.update();
+            sleep(50);
+            moveTicksForward(.8, 500); //drive into the pile
+            telemetry.addLine("I'm eating in the pile!");
+            telemetry.update();
+            sleep(600); //give it time to eat
+            telemetry.addLine("I'm done eating!");
+            telemetry.update();
+            moveTicksBack(.6, 500); //drive out of the pile
+            sleep(50);
+            turnAngle((currentAngle() - facingCryptoAngle)); //correct angle to face cryptobox wall
+            sleep(50);
+            moveTicksBack(.65, 1100); //drive away from the pile
+            turnAngle((currentAngle() - facingCryptoAngle)); //correct angle to face cryptobox wall
+            telemetry.addLine("ready to strafe to the box");
+            telemetry.update();
+            sleep(50);
+            if (team == "blue")
+                moveTicksRight(.6, 800); //strafes back to the center of the cryptobox
+            else if (team == "red")
+                moveTicksLeft(.6, 800); //strafes back to the center of the cryptobox
+            telemetry.addLine("I'm lined up at the cryptobox!");
+            telemetry.update();
+            break;
+        }
+        return;
     }
 }
